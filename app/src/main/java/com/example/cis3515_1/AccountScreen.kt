@@ -109,6 +109,7 @@ fun AccountScreen(modifier: Modifier = Modifier, navController: NavHostControlle
                             if(success)
                             {
                                 errorMessage = ""
+                                navController.navigate(Screen.Account.route)
                                 userEmail = userEmail
                             }
                             else
@@ -135,6 +136,7 @@ fun AccountScreen(modifier: Modifier = Modifier, navController: NavHostControlle
                             if(success)
                             {
                                 errorMessage = ""
+                                navController.navigate(Screen.Account.route)
                                 userEmail = userEmail
                             }
                             else
