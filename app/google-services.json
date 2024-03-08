@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "346252324942",
+    "project_id": "tuj-app-2dd87",
+    "storage_bucket": "tuj-app-2dd87.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346252324942:android:242962fe3d8e0cded8531f",
+        "android_client_info": {
+          "package_name": "com.example.cis3515_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCb8rVf2wJC8WmQz3mvWUp7X7SoHbEoQ_0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

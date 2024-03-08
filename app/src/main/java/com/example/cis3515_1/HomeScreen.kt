@@ -29,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.ui.theme.Red01
 import com.example.cis3515_1.ui.theme.Red05
@@ -40,7 +41,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController)
 {
     Column(horizontalAlignment = Alignment.CenterHorizontally)
     {
-        Scaffold(topBar = { TopNavigationBar()}, bottomBar = { BottomNavigationBar() })
+        Scaffold(topBar = { TopNavigationBar()}, bottomBar = { BottomNavigationBar(navController) })
         {padding ->
             Column(modifier = Modifier
                 .fillMaxSize()

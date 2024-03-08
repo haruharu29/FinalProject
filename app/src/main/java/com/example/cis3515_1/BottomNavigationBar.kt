@@ -14,36 +14,52 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.data.BottomNavigation
 
 val items = listOf(
     BottomNavigation(
         title = "Home",
-        icon = Icons.Rounded.Home
+        icon = Icons.Rounded.Home,
+        route = Screen.Home.route
     ),
 
     BottomNavigation(
         title = "Notifications",
-        icon = Icons.Rounded.Notifications
+        icon = Icons.Rounded.Notifications,
+        route = Screen.Notifications.route
     ),
 
     BottomNavigation(
         title = "Account",
-        icon = Icons.Rounded.AccountCircle
+        icon = Icons.Rounded.AccountCircle,
+        route = Screen.Account.route
     )
 )
 
 
 @Preview
 @Composable
-fun BottomNavigationBar()
+fun BottomNavigationBar(navController: NavHostController)
 {
     NavigationBar {
+        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
         Row (modifier = Modifier.background(MaterialTheme.colorScheme.inverseOnSurface)){
-            items.forEachIndexed{ index, item ->
+            items.forEach { item ->
+                val isSelected = item.route == currentRoute
                 NavigationBarItem(
-                    selected = index == 0,
-                    onClick = { /*TODO*/ },
+                    selected = isSelected,
+                    onClick = {
+                        if (!isSelected) {
+                            navController.navigate(item.route) {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    },
                     icon = {
                         Icon(
                             imageVector = item.icon,

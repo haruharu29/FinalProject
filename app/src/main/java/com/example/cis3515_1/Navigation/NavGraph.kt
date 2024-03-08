@@ -6,8 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.cis3515_1.AccountScreen
 import com.example.cis3515_1.AnimatedSplashScreen
 import com.example.cis3515_1.Clubs
+import com.example.cis3515_1.Discussion
 import com.example.cis3515_1.HomeScreen
 import com.example.cis3515_1.UpcomingEvent
 
@@ -27,13 +29,24 @@ fun SetupNavGraph(navController: NavHostController) {
 
         composable(route = Screen.Club.route)
         {
-            Clubs()
+            Clubs(navController = navController)
         }
 
         composable(route = Screen.UpcomingEvent.route)
         {
             UpcomingEvent()
         }
+
+        composable(route = Screen.Account.route)
+        {
+            AccountScreen(navController = navController)
+        }
+
+        composable(route = Screen.Discussion.route)
+        {
+            Discussion(navController = navController)
+        }
+
 
     }
 }

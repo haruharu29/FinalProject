@@ -9,4 +9,6 @@ sealed class Screen(val route: String)
     object LogIn: Screen("LogIn")
     object InformationSession:  Screen("Information Session")
     object Discussion: Screen("Discussion")
+    object Account: Screen("Account")
+    object Notifications: Screen("Notifications")
 }
