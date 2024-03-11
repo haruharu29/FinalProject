@@ -1,17 +1,18 @@
 package com.example.cis3515_1.Navigation
 
+import AccountScreen
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.cis3515_1.AccountScreen
-import com.example.cis3515_1.AnimatedSplashScreen
-import com.example.cis3515_1.Clubs
-import com.example.cis3515_1.Discussion
-import com.example.cis3515_1.HomeScreen
-import com.example.cis3515_1.UpcomingEvent
+import com.example.cis3515_1.Screens.AnimatedSplashScreen
+import com.example.cis3515_1.Screens.Clubs
+import com.example.cis3515_1.Screens.Discussion
+import com.example.cis3515_1.Screens.HomeScreen
+import com.example.cis3515_1.Screens.InformationSession
+import com.example.cis3515_1.Screens.UpcomingEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +35,7 @@ fun SetupNavGraph(navController: NavHostController) {
 
         composable(route = Screen.UpcomingEvent.route)
         {
-            UpcomingEvent()
+            UpcomingEvent(navController = navController)
         }
 
         composable(route = Screen.Account.route)
@@ -47,6 +48,9 @@ fun SetupNavGraph(navController: NavHostController) {
             Discussion(navController = navController)
         }
 
-
+        composable(route = Screen.InformationSession.route)
+        {
+            InformationSession(navController = navController)
+        }
     }
 }
