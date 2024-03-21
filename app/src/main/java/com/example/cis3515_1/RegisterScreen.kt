@@ -54,10 +54,13 @@ import com.example.cis3515_1.ui.theme.Red01
 import com.example.cis3515_1.ui.theme.Red05
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+
+
 @Composable
-fun AccountScreen(modifier: Modifier = Modifier, navController: NavHostController)
+fun RegisterScreen(modifier: Modifier = Modifier, navController: NavHostController)
 {
     val user = Firebase.auth.currentUser
+    var confirmPassword by remember { mutableStateOf("") }
     var userEmail by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -67,17 +70,7 @@ fun AccountScreen(modifier: Modifier = Modifier, navController: NavHostControlle
         modifier = modifier.fillMaxSize()
     )
     { paddingValues ->
-        if(user != null)
-        {
-            LoggedInScreen(userEmail, onLogout =
-            {
-                Firebase.auth.signOut()
-                navController.navigate(Screen.Account.route)
-                userEmail = ""
-            })
-        }
-        else
-        {
+
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
@@ -116,103 +109,81 @@ fun AccountScreen(modifier: Modifier = Modifier, navController: NavHostControlle
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    label = { Text("Confirm Password") },
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        val image = if (passwordVisible)
+                            Icons.Filled.Visibility
+                        else Icons.Filled.VisibilityOff
+
+                        val description = if (passwordVisible) "Hide password" else "Show password"
+
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(imageVector = image, description)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
                 if(errorMessage.isNotEmpty())
                 {
                     Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
                     Spacer(modifier = Modifier.height(8.dp))
                 }
-                Button(onClick =
-                {
-                    if(userEmail.endsWith("@temple.edu"))
-                    {
-                        loginUser(userEmail, password)
-                        { success, message ->
-                            if(success)
-                            {
+                Button(onClick = {
+                    if (!userEmail.endsWith("@temple.edu")) {
+                        errorMessage = "Please use a @temple.edu email address"
+                    } else if (password != confirmPassword) {
+                        errorMessage = "Passwords do not match"
+                    } else {
+                        registerUser(userEmail, password) { success, message ->
+                            if (success) {
                                 errorMessage = ""
                                 navController.navigate(Screen.Account.route)
-                                userEmail = userEmail
-                            }
-                            else
-                            {
+                            } else {
                                 errorMessage = message
                             }
                         }
                     }
-                    else
-                    {
-                        errorMessage = "Please use a @temple.edu email address"
-                    }
-                })
-                {
-                    Text("Login")
+                }) {
+                    Text("Register")
                 }
 
-                TextButton(onClick =
-                {
-                                navController.navigate(Screen.RegisterScreen.route)
+//                if (errorMessage.isNotEmpty()) {
+//                    Button(onClick = {
+//                        resendVerificationEmail(userEmail) { success, message ->
+//                            if (success) {
+//                                errorMessage = "Verification email resent. Please check your inbox."
+//                            } else {
+//                                errorMessage = message
+//                            }
+//                        }
+//                    }) {
+//                        Text("Resend Verification Email")
+//                    }
+//                }
 
-                })
-                {
-                    Text("No account? Register")
-                }
-            }
+
         }
 
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewAccountScreen()
-{
-    AccountScreen(modifier = Modifier, navController = rememberNavController())
-}
-
-fun registerUser(email: String, password: String, onResult: (Boolean, String) -> Unit) {
-    val auth = Firebase.auth
-    auth.createUserWithEmailAndPassword(email, password)
-        .addOnCompleteListener { task ->
-            if(task.isSuccessful)
-            {
-                onResult(true, "Registration successful")
-            }
-            else
-            {
-                onResult(false, task.exception?.message ?: "Registration failed")
-            }
-        }
-}
-
-fun loginUser(email: String, password: String, onResult: (Boolean, String) -> Unit) {
-    val auth = Firebase.auth
-    auth.signInWithEmailAndPassword(email, password)
-        .addOnCompleteListener { task ->
-            if(task.isSuccessful)
-            {
-                onResult(true, "Login successful")
-            }
-            else
-            {
-                onResult(false, task.exception?.message ?: "Login failed")
-            }
-        }
-}
-
-@Composable
-fun LoggedInScreen(userEmail: String, onLogout: () -> Unit) {
-    val userEmail = Firebase.auth.currentUser?.email ?: "No email"
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    )
-    {
-        Text(text = "Logged in as $userEmail", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { onLogout() })
-        {
-            Text("Logout")
-        }
-    }
-}
+//fun resendVerificationEmail(email: String, onResult: (Boolean, String) -> Unit) {
+//    val user = Firebase.auth.currentUser
+//    if (user != null && !user.isEmailVerified) {
+//        user.sendEmailVerification().addOnCompleteListener { task ->
+//            if (task.isSuccessful) {
+//                onResult(true, "Verification email sent.")
+//            } else {
+//                onResult(false, task.exception?.message ?: "Failed to resend verification email.")
+//            }
+//        }
+//    }
+//}

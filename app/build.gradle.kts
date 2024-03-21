@@ -70,7 +70,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // Navigation Compose
-    implementation("androidx.navigation:navigation-compose:2.4.0-beta02")
+    implementation("androidx.navigation:navigation-compose:2.7.7")
 
     //system UI Controller
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
@@ -91,5 +91,24 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
 
     implementation ("androidx.compose.material:material-icons-extended:1.6.3")
+
+    implementation ("androidx.compose.material3:material3:1.2.1")
+
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
+
+    // Declare the dependency for the Cloud Firestore library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-firestore")
+
+    implementation ("com.google.firebase:firebase-firestore-ktx")
+    implementation ("com.google.firebase:firebase-storage-ktx")
+    implementation ("com.squareup.okhttp3:okhttp:4.12.0")
+
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+    implementation ("androidx.compose.material:material:<compose_version>")
+
 
 }
