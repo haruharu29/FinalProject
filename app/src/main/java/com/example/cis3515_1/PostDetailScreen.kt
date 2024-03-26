@@ -4,8 +4,10 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.AddComment
@@ -40,6 +43,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -106,6 +110,7 @@ fun PostDetailScreen(postId: String, navController: NavHostController)
     }
 
     var showDialog by remember { mutableStateOf(false) }
+    var showDeletePostDialog by remember { mutableStateOf(false) }
     var userName by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
 
@@ -117,6 +122,15 @@ fun PostDetailScreen(postId: String, navController: NavHostController)
         imageUris = uris
     }
 
+    var userNameEditable by remember { mutableStateOf(true) }
+
+    LaunchedEffect(key1 = showDialog) {
+        if (showDialog) {
+            userName = getOrSetUsernameForPost(postId, currentUserId, null) ?: ""
+            userNameEditable = userName.isEmpty()
+        }
+    }
+
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
@@ -125,9 +139,11 @@ fun PostDetailScreen(postId: String, navController: NavHostController)
                 Column {
                     OutlinedTextField(
                         value = userName,
-                        onValueChange = { userName = it },
+                        onValueChange = { if (userNameEditable) userName = it },
                         label = { Text("Username") },
-                        singleLine = true
+                        singleLine = true,
+                        readOnly = !userNameEditable,
+//                        TODO: Set the background color
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -166,7 +182,7 @@ fun PostDetailScreen(postId: String, navController: NavHostController)
                         uploadComment(
                             postId = postId,
                             content = content,
-                            userName = userName,
+                            proposedUserName = userName,
                             imageUris = imageUris,
                             navController = navController
                         )
@@ -207,10 +223,34 @@ fun PostDetailScreen(postId: String, navController: NavHostController)
                                 fontSize = 34.sp,
                                 lineHeight = 40.sp
                             )
-//                        TODO: change top bar instead of button
+
                             if (currentUserId == post!!.uid) {
-                                IconButton(onClick = { deletePost(postId, navController) }) {
+                                IconButton(onClick =
+                                {
+                                    showDeletePostDialog = true
+                                }) {
                                     Icon(Icons.Default.Delete, contentDescription = "Delete Post")
+                                }
+
+                                if (showDeletePostDialog) {
+                                    AlertDialog(
+                                        onDismissRequest = { showDeletePostDialog = false },
+                                        title = { Text("Delete Post") },
+                                        text = { Text("Are you sure you want to delete this post?") },
+                                        confirmButton = {
+                                            Button(onClick = {
+                                                deletePost(postId, navController)
+                                                showDeletePostDialog = false
+                                            }) {
+                                                Text("Delete")
+                                            }
+                                        },
+                                        dismissButton = {
+                                            Button(onClick = { showDeletePostDialog = false }) {
+                                                Text("Cancel")
+                                            }
+                                        }
+                                    )
                                 }
                             }
                         }
@@ -279,6 +319,8 @@ fun PostDetailScreen(postId: String, navController: NavHostController)
                     CommentItem(
                         comment = comment,
                         currentUserId = currentUserId,
+                        postId = postId,
+                        navController = navController,
                         onDelete = {
                             deleteComment(comment.postId, comment.id, navController)
                         },
@@ -294,9 +336,12 @@ fun PostDetailScreen(postId: String, navController: NavHostController)
 
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CommentItem(comment: Comment,
                 currentUserId: String,
+                postId: String,
+                navController: NavController,
                 onDelete: () -> Unit,
                 onReply: (String, String, String, String) -> Unit
 ) {
@@ -305,6 +350,9 @@ fun CommentItem(comment: Comment,
     var replyContent by remember { mutableStateOf("") }
     var userName by remember { mutableStateOf("") }
     var replies by remember { mutableStateOf<List<CommentToComment>>(emptyList()) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var selectedReplyId by remember { mutableStateOf("") }
+    var userNameEditable by remember { mutableStateOf(true) }
 
     LaunchedEffect(comment.id) {
         replies = fetchRepliesForComment(comment.postId, comment.id)
@@ -317,12 +365,12 @@ fun CommentItem(comment: Comment,
                 onReply(comment.postId, userName, replyContent, comment.id)
                 showDialogForReply = false
                 replyContent = ""
-                userName = ""
             },
             userName = userName,
             replyContent = replyContent,
+            userNameEditable = userNameEditable,
             onReplyContentChange = { replyContent = it },
-            onUserNameChange = { userName = it }
+            onUserNameChange = { if (userNameEditable) userName = it }
         )
     }
 
@@ -360,7 +408,12 @@ fun CommentItem(comment: Comment,
                                 DropdownMenuItem(
                                     text = { Text("Reply") },
                                     onClick = {
-                                        showDialogForReply = true
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            val userId = Firebase.auth.currentUser?.email ?: ""
+                                            userName = getOrSetUsernameForPost(postId, userId, null) ?: ""
+                                            userNameEditable = userName.isEmpty()
+                                            showDialogForReply = true
+                                        }
                                         expanded = false
                                     }
                                 )
@@ -410,13 +463,46 @@ fun CommentItem(comment: Comment,
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.5f)
                             ),
-                            modifier = Modifier.padding(4.dp).fillMaxWidth()
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .fillMaxWidth()
+                                .combinedClickable(
+                                    onClick = {
+                                    },
+                                    onLongClick = {
+                                        if (currentUserId == reply.uid) {
+                                            selectedReplyId = reply.id
+                                            showDeleteDialog = true
+                                        }
+                                    }
+                                )
                         ) {
                             Text(
                                 text = "${reply.userName}: ${reply.content}",
                                 modifier = Modifier.padding(8.dp)
                             )
                         }
+                    }
+
+                    if (showDeleteDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showDeleteDialog = false },
+                            title = { Text("Delete Reply") },
+                            text = { Text("Are you sure you want to delete this reply?") },
+                            confirmButton = {
+                                Button(onClick = {
+                                    deleteReply(postId, comment.id, selectedReplyId, navController)
+                                    showDeleteDialog = false
+                                }) {
+                                    Text("Delete")
+                                }
+                            },
+                            dismissButton = {
+                                Button(onClick = { showDeleteDialog = false }) {
+                                    Text("Cancel")
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -431,19 +517,21 @@ suspend fun fetchPostFromFirestore(postId: String): Post? {
     val firestore = FirebaseFirestore.getInstance()
     try {
         val documentSnapshot = firestore.collection("posts").document(postId).get().await()
-        return if (documentSnapshot.exists()) {
-            Post(
+        if (documentSnapshot.exists()) {
+            return Post(
                 id = documentSnapshot.id,
                 title = documentSnapshot.getString("title") ?: "",
                 content = documentSnapshot.getString("content") ?: "",
                 uid = documentSnapshot.getString("uid") ?: "",
-                userName = documentSnapshot.getString("userName") ?: "",
+                userName = documentSnapshot.getString("userName") ?: "Anonymous",
                 date = Date(documentSnapshot.getLong("date") ?: 0L),
                 commentNum = documentSnapshot.getLong("commentNum")?.toInt() ?: 0,
                 imageUrls = documentSnapshot.get("imageUrls") as List<String>? ?: emptyList(),
                 category = documentSnapshot.getString("category") ?: ""
             )
-        } else null
+        } else {
+            return null
+        }
     } catch (e: Exception) {
         e.printStackTrace()
         return null
@@ -482,17 +570,19 @@ fun deleteComment(postId: String, commentId: String, navController: NavControlle
     GlobalScope.launch(Dispatchers.IO) {
         try {
             val firestore = FirebaseFirestore.getInstance()
+            val commentRef = firestore.collection("posts").document(postId).collection("comments").document(commentId)
+            val repliesCount = commentRef.collection("replies").get().await().size()
 
             firestore.runTransaction { transaction ->
                 val postRef = firestore.collection("posts").document(postId)
 
                 val postSnapshot = transaction.get(postRef)
                 val currentCommentNum = postSnapshot.getLong("commentNum") ?: 0
-                if (currentCommentNum > 0) {
-                    transaction.update(postRef, "commentNum", currentCommentNum - 1)
+                val newCommentNum = currentCommentNum - (repliesCount + 1)
+                if (newCommentNum >= 0) {
+                    transaction.update(postRef, "commentNum", newCommentNum)
                 }
 
-                val commentRef = postRef.collection("comments").document(commentId)
                 transaction.delete(commentRef)
             }.await()
 
@@ -514,7 +604,7 @@ fun deleteComment(postId: String, commentId: String, navController: NavControlle
 fun uploadComment(
     postId: String,
     content: String,
-    userName: String,
+    proposedUserName: String,
     imageUris: List<Uri>,
     navController: NavController
 ){
@@ -522,14 +612,8 @@ fun uploadComment(
     val storageRef = FirebaseStorage.getInstance().reference
     val userEmail = Firebase.auth.currentUser?.email ?: ""
 
-    val postRef = firestore.collection("posts").document(postId)
-    firestore.runTransaction { transaction ->
-        val postSnapshot = transaction.get(postRef)
-        val currentCommentNum = postSnapshot.getLong("commentNum") ?: 0
-        transaction.update(postRef, "commentNum", currentCommentNum + 1)
-    }
-
     CoroutineScope(Dispatchers.IO).launch {
+        val userName = getOrSetUsernameForPost(postId, userEmail, proposedUserName)
         val imageUrls = imageUris.mapNotNull { uri ->
             val imageRef = storageRef.child("comments/${postId}/${System.currentTimeMillis()}_${uri.lastPathSegment}")
             val uploadTask = imageRef.putFile(uri).await()
@@ -545,22 +629,28 @@ fun uploadComment(
             "imageUrls" to imageUrls
         )
 
+        firestore.runTransaction { transaction ->
+            val postSnapshot = transaction.get(firestore.collection("posts").document(postId))
+            val currentCommentNum = postSnapshot.getLong("commentNum") ?: 0
+            transaction.update(firestore.collection("posts").document(postId), "commentNum", currentCommentNum + 1)
+        }.await()
+
         firestore.collection("posts").document(postId)
             .collection("comments").add(comment)
-            .addOnSuccessListener { documentReference ->
-                navController.popBackStack()
-                val route = Screen.PostDetail.createRoute(postId)
-                navController.navigate(route) {
-                    popUpTo(route) { inclusive = true }
-                    launchSingleTop = true
-                    restoreState = true
-                }
+            .await()
+
+        withContext(Dispatchers.Main) {
+            navController.popBackStack()
+            val route = Screen.PostDetail.createRoute(postId)
+            navController.navigate(route) {
+                popUpTo(route) { inclusive = true }
+                launchSingleTop = true
+                restoreState = true
             }
-            .addOnFailureListener {
-                navController.navigate("HomeScreen")
-            }
+        }
     }
 }
+
 
 fun deletePost(postId: String, navController: NavController) {
     val firestore = FirebaseFirestore.getInstance()
@@ -577,28 +667,39 @@ fun deletePost(postId: String, navController: NavController) {
     }
 }
 
-fun uploadReply(postId: String, userName: String, replyContent: String, commentId: String, navController: NavController) {
-
-    val userEmail = Firebase.auth.currentUser?.email ?: ""
-    val reply = hashMapOf(
-        "commentId" to commentId,
-        "content" to replyContent,
-        "uid" to userEmail,
-        "userName" to userName,
-        "date" to System.currentTimeMillis(),
-    )
-
+fun uploadReply(
+    postId: String,
+    proposedUserName: String,
+    replyContent: String,
+    commentId: String,
+    navController: NavController
+) {
     val firestore = FirebaseFirestore.getInstance()
-    val postRef = firestore.collection("posts").document(postId)
-    firestore.runTransaction { transaction ->
-        val postSnapshot = transaction.get(postRef)
-        val currentCommentNum = postSnapshot.getLong("commentNum") ?: 0
-        transaction.update(postRef, "commentNum", currentCommentNum + 1)
-    }
-    firestore.collection("posts").document(postId)
-        .collection("comments").document(commentId)
-        .collection("replies").add(reply)
-        .addOnSuccessListener { documentReference ->
+    val userEmail = Firebase.auth.currentUser?.email ?: ""
+
+    CoroutineScope(Dispatchers.IO).launch {
+        val userName = getOrSetUsernameForPost(postId, userEmail, proposedUserName)
+
+        val reply = hashMapOf(
+            "commentId" to commentId,
+            "content" to replyContent,
+            "uid" to userEmail,
+            "userName" to userName,
+            "date" to System.currentTimeMillis(),
+        )
+
+        firestore.runTransaction { transaction ->
+            val postSnapshot = transaction.get(firestore.collection("posts").document(postId))
+            val currentCommentNum = postSnapshot.getLong("commentNum") ?: 0
+            transaction.update(firestore.collection("posts").document(postId), "commentNum", currentCommentNum + 1)
+        }.await()
+
+        firestore.collection("posts").document(postId)
+            .collection("comments").document(commentId)
+            .collection("replies").add(reply)
+            .await()
+
+        withContext(Dispatchers.Main) {
             navController.popBackStack()
             val route = Screen.PostDetail.createRoute(postId)
             navController.navigate(route) {
@@ -606,11 +707,8 @@ fun uploadReply(postId: String, userName: String, replyContent: String, commentI
                 launchSingleTop = true
                 restoreState = true
             }
-
         }
-        .addOnFailureListener {
-
-        }
+    }
 }
 
 @Composable
@@ -619,6 +717,7 @@ fun ReplyInputDialog(
     onReply: (String) -> Unit,
     replyContent: String,
     userName: String,
+    userNameEditable: Boolean,
     onReplyContentChange: (String) -> Unit,
     onUserNameChange: (String) -> Unit
 ) {
@@ -633,7 +732,8 @@ fun ReplyInputDialog(
                     label = { Text("Username") },
                     placeholder = { Text("Type your username here...") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = !userNameEditable
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
@@ -688,5 +788,54 @@ suspend fun fetchRepliesForComment(postId: String, commentId: String): List<Comm
     return replies
 }
 
+fun deleteReply(postId: String, commentId: String, replyId: String, navController: NavController) {
+    val firestore = FirebaseFirestore.getInstance()
 
+    GlobalScope.launch(Dispatchers.IO) {
+        try {
+            val replyRef = firestore.collection("posts").document(postId)
+                .collection("comments").document(commentId)
+                .collection("replies").document(replyId)
 
+            replyRef.delete().await()
+
+            val postRef = firestore.collection("posts").document(postId)
+            firestore.runTransaction { transaction ->
+                val postSnapshot = transaction.get(postRef)
+                val currentCommentNum = postSnapshot.getLong("commentNum") ?: 0
+                if (currentCommentNum > 0) {
+                    transaction.update(postRef, "commentNum", currentCommentNum - 1)
+                }
+            }.await()
+
+            withContext(Dispatchers.Main) {
+                navController.popBackStack()
+                val route = Screen.PostDetail.createRoute(postId)
+                navController.navigate(route) {
+                    popUpTo(route) { inclusive = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+            }
+            e.printStackTrace()
+        }
+    }
+}
+
+suspend fun getOrSetUsernameForPost(postId: String, userId: String, proposedUsername: String?): String {
+    val firestore = FirebaseFirestore.getInstance()
+    val usernameMapRef = firestore.collection("posts").document(postId).collection("usernames")
+
+    val docSnapshot = usernameMapRef.document(userId).get().await()
+    if (docSnapshot.exists()) {
+        return docSnapshot.getString("username") ?: ""
+    } else if (proposedUsername != null) {
+        usernameMapRef.document(userId).set(mapOf("username" to proposedUsername)).await()
+        return proposedUsername
+    } else {
+        return ""
+    }
+}

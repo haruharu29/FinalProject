@@ -16,6 +16,7 @@ import com.example.cis3515_1.Clubs
 import com.example.cis3515_1.Discussion
 import com.example.cis3515_1.DiscussionSearch
 import com.example.cis3515_1.HomeScreen
+import com.example.cis3515_1.Notifications
 import com.example.cis3515_1.PostDetailScreen
 import com.example.cis3515_1.RegisterScreen
 import com.example.cis3515_1.UpcomingEvent
@@ -42,6 +43,10 @@ fun SetupNavGraph(navController: NavHostController) {
         composable(route = Screen.UpcomingEvent.route)
         {
             UpcomingEvent()
+        }
+        composable(route = Screen.Notifications.route)
+        {
+            Notifications(navController = navController)
         }
 
         composable(route = Screen.Account.route)

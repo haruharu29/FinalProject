@@ -163,7 +163,7 @@ fun AddPostScreen(modifier: Modifier = Modifier, navController: NavController) {
                     uploadPost(
                         title = title,
                         content = content,
-                        userName = userName,
+                        proposedUsername = userName,
                         imageUris = imageUris,
                         selectedCategory = selectedCategory,
                         navController = navController
@@ -184,39 +184,46 @@ fun uploadPost(
     imageUris: List<Uri>,
     selectedCategory: String,
     navController: NavController,
-    userName: String
+    proposedUsername: String
 ) {
     val firestore = FirebaseFirestore.getInstance()
     val storageRef = FirebaseStorage.getInstance().reference
     val userEmail = Firebase.auth.currentUser?.email ?: ""
 
-
     CoroutineScope(Dispatchers.IO).launch {
-        val imageUrls = imageUris.mapNotNull { uri ->
-            val imageRef = storageRef.child("posts/${System.currentTimeMillis()}_${uri.lastPathSegment}")
-            val uploadTask = imageRef.putFile(uri).await()
-            imageRef.downloadUrl.await().toString()
-        }
+        try {
+            val imageUrls = imageUris.mapNotNull { uri ->
+                val imageRef = storageRef.child("posts/${System.currentTimeMillis()}_${uri.lastPathSegment}")
+                val uploadTask = imageRef.putFile(uri).await()
+                imageRef.downloadUrl.await().toString()
+            }
 
-        val post = hashMapOf(
-            "title" to title,
-            "content" to content,
-            "uid" to userEmail,
-            "userName" to userName,
-            "date" to System.currentTimeMillis(),
-            "imageUrls" to imageUrls,
-            "category" to selectedCategory,
-            "commentNum" to 0
-        )
+            val post = hashMapOf(
+                "title" to title,
+                "content" to content,
+                "uid" to userEmail,
+                "userName" to proposedUsername,
+                "date" to System.currentTimeMillis(),
+                "imageUrls" to imageUrls,
+                "category" to selectedCategory,
+                "commentNum" to 0
+            )
 
-        firestore.collection("posts").add(post)
-            .addOnSuccessListener { documentReference ->
-                val postId = documentReference.id
+            val documentReference = firestore.collection("posts").add(post).await()
+            val postId = documentReference.id
+
+            if(proposedUsername.isNotEmpty()) {
+                getOrSetUsernameForPost(postId, userEmail, proposedUsername)
+            }
+
+            withContext(Dispatchers.Main) {
                 navController.navigate("Discussion/All")
             }
-            .addOnFailureListener {
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
                 navController.navigate("HomeScreen")
             }
+        }
     }
 }
 

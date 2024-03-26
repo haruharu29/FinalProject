@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,6 +17,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -24,12 +29,15 @@ import androidx.navigation.NavHostController
 import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.ui.theme.Red01
 import com.example.cis3515_1.ui.theme.Red05
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 //@Preview(showBackground = true)
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController)
 {
+    val firebaseAuth = FirebaseAuth.getInstance()
+    var showDialog by remember { mutableStateOf(false) }
     Column(horizontalAlignment = Alignment.CenterHorizontally)
     {
         Scaffold(topBar = { TopNavigationBar()}, bottomBar = { BottomNavigationBar(navController) })
@@ -86,12 +94,37 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavHostController)
                             Text("Information Session", Modifier.padding(16.dp))
                         }
 
-                        Button(onClick = {navController.navigate(Screen.Discussion.createRoute("All"))}, modifier = Modifier
+                        Button(onClick =
+                            {
+                                if (firebaseAuth.currentUser == null)
+                                {
+                                    showDialog = true
+                                }
+                                else
+                                {
+                                    navController.navigate(Screen.Discussion.createRoute("All"))
+                                }
+                            }, modifier = Modifier
                             .padding(10.dp)
                             .height(180.dp)
                             .width(180.dp), shape = ShapeDefaults.Large)
                         {
                             Text("Discussion", Modifier.padding(16.dp))
+                        }
+                        if (showDialog)
+                        {
+                            AlertDialog(
+                                onDismissRequest = { showDialog = false },
+                                title = { Text("Login Required") },
+                                text = { Text("You must be logged in to view the discussion.") },
+                                confirmButton =
+                                {
+                                    Button(onClick = { showDialog = false })
+                                    {
+                                        Text("OK")
+                                    }
+                                }
+                            )
                         }
                     }
 
