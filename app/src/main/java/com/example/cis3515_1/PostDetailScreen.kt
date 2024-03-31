@@ -76,6 +76,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import model.Comment
 import model.CommentToComment
+import model.Notification
 import model.Post
 import java.util.Date
 
@@ -84,6 +85,7 @@ import java.util.Date
 fun PostDetailScreen(postId: String, navController: NavHostController)
 {
     var post by remember { mutableStateOf<Post?>(null) }
+    val scope = rememberCoroutineScope()
 
     val comments = remember { mutableStateOf<List<Comment>>(emptyList()) }
     val currentUserId = Firebase.auth.currentUser?.email ?: ""
@@ -179,13 +181,15 @@ fun PostDetailScreen(postId: String, navController: NavHostController)
                 Button(
                     onClick = {
                         showDialog = false
-                        uploadComment(
-                            postId = postId,
-                            content = content,
-                            proposedUserName = userName,
-                            imageUris = imageUris,
-                            navController = navController
-                        )
+                        scope.launch {
+                            uploadComment(
+                                postId = postId,
+                                content = content,
+                                proposedUserName = userName,
+                                imageUris = imageUris,
+                                navController = navController
+                            )
+                        }
                     }
                 ) {
                     Text("Post Comment")
@@ -325,7 +329,9 @@ fun PostDetailScreen(postId: String, navController: NavHostController)
                             deleteComment(comment.postId, comment.id, navController)
                         },
                         onReply = { postId, userName, replyContent, commentId ->
-                            uploadReply(postId, userName, replyContent, commentId, navController)
+                            scope.launch {
+                                uploadReply(postId, userName, replyContent, commentId, navController)
+                            }
                         }
                     )
                 }
@@ -601,7 +607,7 @@ fun deleteComment(postId: String, commentId: String, navController: NavControlle
     }
 }
 
-fun uploadComment(
+suspend fun uploadComment(
     postId: String,
     content: String,
     proposedUserName: String,
@@ -611,6 +617,10 @@ fun uploadComment(
     val firestore = FirebaseFirestore.getInstance()
     val storageRef = FirebaseStorage.getInstance().reference
     val userEmail = Firebase.auth.currentUser?.email ?: ""
+
+    val postRef = firestore.collection("posts").document(postId)
+    val postSnapshot = postRef.get().await()
+    val postOwnerId = postSnapshot.getString("uid")
 
     CoroutineScope(Dispatchers.IO).launch {
         val userName = getOrSetUsernameForPost(postId, userEmail, proposedUserName)
@@ -635,9 +645,24 @@ fun uploadComment(
             transaction.update(firestore.collection("posts").document(postId), "commentNum", currentCommentNum + 1)
         }.await()
 
+        // for notification
         firestore.collection("posts").document(postId)
-            .collection("comments").add(comment)
-            .await()
+            .collection("comments").add(comment).await().let {
+                val postSnapshot = firestore.collection("posts").document(postId).get().await()
+                val postOwnerId = postSnapshot.getString("uid")
+                if (userEmail != postOwnerId) {
+                    val notification = Notification(
+                        postId = postId,
+                        senderId = userEmail,
+                        senderName = userName,
+                        type = "postReply",
+                        contentPreview = content.take(100),
+                        date = Date(System.currentTimeMillis()),
+                    )
+                    createNotificationForUser(postOwnerId!!, notification)
+                }
+            }
+
 
         withContext(Dispatchers.Main) {
             navController.popBackStack()
@@ -667,7 +692,7 @@ fun deletePost(postId: String, navController: NavController) {
     }
 }
 
-fun uploadReply(
+suspend fun uploadReply(
     postId: String,
     proposedUserName: String,
     replyContent: String,
@@ -677,27 +702,43 @@ fun uploadReply(
     val firestore = FirebaseFirestore.getInstance()
     val userEmail = Firebase.auth.currentUser?.email ?: ""
 
-    CoroutineScope(Dispatchers.IO).launch {
-        val userName = getOrSetUsernameForPost(postId, userEmail, proposedUserName)
+    val userName = getOrSetUsernameForPost(postId, userEmail, proposedUserName)
 
-        val reply = hashMapOf(
-            "commentId" to commentId,
-            "content" to replyContent,
-            "uid" to userEmail,
-            "userName" to userName,
-            "date" to System.currentTimeMillis(),
-        )
+    val reply = hashMapOf(
+        "commentId" to commentId,
+        "content" to replyContent,
+        "uid" to userEmail,
+        "userName" to userName,
+        "date" to System.currentTimeMillis(),
+    )
 
-        firestore.runTransaction { transaction ->
-            val postSnapshot = transaction.get(firestore.collection("posts").document(postId))
-            val currentCommentNum = postSnapshot.getLong("commentNum") ?: 0
-            transaction.update(firestore.collection("posts").document(postId), "commentNum", currentCommentNum + 1)
-        }.await()
+    firestore.runTransaction { transaction ->
+        val postSnapshot = transaction.get(firestore.collection("posts").document(postId))
+        val currentCommentNum = postSnapshot.getLong("commentNum") ?: 0
+        transaction.update(firestore.collection("posts").document(postId), "commentNum", currentCommentNum + 1)
+    }.await()
 
-        firestore.collection("posts").document(postId)
-            .collection("comments").document(commentId)
-            .collection("replies").add(reply)
-            .await()
+    val commentSnapshot = firestore.collection("posts").document(postId)
+        .collection("comments").document(commentId).get().await()
+    val commentOwnerId = commentSnapshot.getString("uid")
+
+    // for notification
+    firestore.collection("posts").document(postId)
+        .collection("comments").document(commentId)
+        .collection("replies").add(reply).await().let {
+            if (userEmail != commentOwnerId) {
+                val notification = Notification(
+                    postId = postId,
+                    commentId = commentId,
+                    senderId = userEmail,
+                    senderName = userName,
+                    type = "commentReply",
+                    contentPreview = replyContent.take(100),
+                    date = Date(System.currentTimeMillis()),
+                )
+                createNotificationForUser(commentOwnerId!!, notification)
+            }
+        }
 
         withContext(Dispatchers.Main) {
             navController.popBackStack()
@@ -708,7 +749,7 @@ fun uploadReply(
                 restoreState = true
             }
         }
-    }
+
 }
 
 @Composable
