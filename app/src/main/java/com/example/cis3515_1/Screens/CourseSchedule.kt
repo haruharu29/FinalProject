@@ -4,25 +4,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import com.example.cis3515_1.BottomNavigationBar
 import com.example.cis3515_1.TopNavigationBar
+import androidx.compose.ui.Modifier
 
 @Composable
-fun InformationSession(modifier: Modifier = Modifier, navController: NavHostController)
+fun CourseSchedule(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navController: NavHostController)
 {
-    Scaffold(topBar = { TopNavigationBar() }, bottomBar = { BottomNavigationBar(navController) })
+    Scaffold(topBar = { TopNavigationBar(onClick = onClick) }, bottomBar = { BottomNavigationBar(navController) })
     { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
+            modifier = Modifier.fillMaxSize().padding(padding)
         )
-        {
-            Text(text = "Information Session")
-        }
+        {}
     }
 }

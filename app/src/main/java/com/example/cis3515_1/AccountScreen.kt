@@ -1,8 +1,8 @@
+package com.example.cis3515_1
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,11 +10,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Key
+import androidx.compose.material.icons.rounded.Password
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,11 +30,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,21 +43,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.cis3515_1.Navigation.Screen
+import com.example.cis3515_1.Screens.LogIn
 import com.example.cis3515_1.ui.theme.Red01
 import com.example.cis3515_1.ui.theme.Red05
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+
 @Composable
-fun AccountScreen(modifier: Modifier = Modifier, navController: NavHostController)
-{
+fun AccountScreen(modifier: Modifier = Modifier, navController: NavHostController) {
     val user = Firebase.auth.currentUser
     var userEmail by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -60,40 +70,46 @@ fun AccountScreen(modifier: Modifier = Modifier, navController: NavHostControlle
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
-        modifier = modifier.fillMaxSize()
+        topBar = {},
+        bottomBar = {},
     )
     { paddingValues ->
-        if(user != null)
+        if (user != null)
         {
             LoggedInScreen(userEmail, onLogout =
             {
                 Firebase.auth.signOut()
                 navController.navigate(Screen.Account.route)
                 userEmail = ""
-            })
+            }, navController = navController)
+
         }
+
         else
         {
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .padding(16.dp),
+            Column(modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            )
+                verticalArrangement = Arrangement.Center)
             {
+                
                 OutlinedTextField(
                     value = userEmail,
                     onValueChange = { userEmail = it },
+                    leadingIcon = {Icon(Icons.Rounded.AccountCircle, null)},
                     label = { Text("Email Address") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
+                    leadingIcon = {Icon(Icons.Rounded.Key, null)},
                     label = { Text("Password") },
                     singleLine = true,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -106,74 +122,79 @@ fun AccountScreen(modifier: Modifier = Modifier, navController: NavHostControlle
                         // Please provide localized description for accessibility services
                         val description = if (passwordVisible) "Hide password" else "Show password"
 
-                        IconButton(onClick = {passwordVisible = !passwordVisible}){
-                            Icon(imageVector  = image, description)
+                        IconButton(onClick = { passwordVisible = !passwordVisible })
+                        {
+                            Icon(imageVector = image, description)
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                                   }, modifier = Modifier.fillMaxWidth())
+
                 Spacer(modifier = Modifier.height(8.dp))
-                if(errorMessage.isNotEmpty())
+
+                if (errorMessage.isNotEmpty())
                 {
                     Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
                     Spacer(modifier = Modifier.height(8.dp))
                 }
+
                 Button(onClick =
                 {
-                    if(userEmail.endsWith("@temple.edu"))
+                    if (userEmail.endsWith("@temple.edu")||(userEmail.endsWith("@tuj.temple.edu")))
                     {
                         loginUser(userEmail, password)
                         { success, message ->
-                            if(success)
+                            if (success)
                             {
                                 errorMessage = ""
                                 navController.navigate(Screen.Account.route)
                                 userEmail = userEmail
                             }
+
                             else
                             {
                                 errorMessage = message
                             }
                         }
                     }
+
                     else
                     {
                         errorMessage = "Please use a @temple.edu email address"
                     }
-                })
+                }
+                )
                 {
                     Text("Login")
                 }
 
                 TextButton(onClick =
                 {
-                    if(userEmail.endsWith("@temple.edu"))
-                    {
-                        registerUser(userEmail, password)
-                        { success, message ->
-                            if(success)
+                  if ((userEmail.endsWith("@temple.edu"))||(userEmail.endsWith("@tuj.temple.edu"))) {
+                     registerUser(userEmail, password)
+                     { success, message ->
+                            if (success)
                             {
                                 errorMessage = ""
                                 navController.navigate(Screen.Account.route)
                                 userEmail = userEmail
                             }
+
                             else
                             {
                                 errorMessage = message
                             }
-                        }
-                    }
-                    else
-                    {
-                        errorMessage = "Please use a @temple.edu email address"
-                    }
+                     }
+                  }
+
+                  else
+                  {
+                      errorMessage = "Please use a @temple.edu email address"
+                  }
                 })
                 {
                     Text("No account? Register")
                 }
             }
         }
-
     }
 }
 
@@ -199,14 +220,13 @@ fun registerUser(email: String, password: String, onResult: (Boolean, String) ->
         }
 }
 
-fun loginUser(email: String, password: String, onResult: (Boolean, String) -> Unit,) {
+fun loginUser(email: String, password: String, onResult: (Boolean, String) -> Unit) {
     val auth = Firebase.auth
     auth.signInWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             if(task.isSuccessful)
             {
                 onResult(true, "Login successful")
-
             }
             else
             {
@@ -215,20 +235,62 @@ fun loginUser(email: String, password: String, onResult: (Boolean, String) -> Un
         }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoggedInScreen(userEmail: String, onLogout: () -> Unit) {
+fun LoggedInScreen(userEmail: String, onLogout: () -> Unit, navController: NavHostController)
+{
     val userEmail = Firebase.auth.currentUser?.email ?: "No email"
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+    /*Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-    )
-    {
+    ) {
+        {
         Text(text = "Logged in as $userEmail", style = MaterialTheme.typography.headlineMedium)
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = { navController.navigate(Screen.Home.route)})
+        {
+            Text("Go to Home")
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = { onLogout() })
         {
             Text("Logout")
+        }
+    }
+ }*/
+    Dialog(onDismissRequest = {})
+    {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+                .padding(10.dp),
+            shape = RoundedCornerShape(16.dp))
+        {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally)
+            {
+                Icon(painter = painterResource(id = R.drawable.logout), contentDescription = null, modifier = Modifier
+                    .padding(top = 20.dp)
+                    .size(40.dp))
+
+                Text(text = "You are successfully logged in!", modifier = Modifier.align(Alignment.CenterHorizontally).padding(20.dp), fontWeight = FontWeight.Bold, fontSize = 17.8.sp)
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center)
+                {
+                    TextButton(onClick = { navController.navigate(Screen.Home.route) }, modifier = Modifier.padding(8.dp))
+                    {
+                        Text("Go to Home")
+                    }
+                }
+            }
         }
     }
 }

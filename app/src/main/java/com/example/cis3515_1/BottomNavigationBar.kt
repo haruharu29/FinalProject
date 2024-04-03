@@ -13,9 +13,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.data.BottomNavigation
@@ -34,16 +32,14 @@ val items = listOf(
     ),
 
     BottomNavigation(
-        title = "Account",
+        title = "Log Out",
         icon = Icons.Rounded.AccountCircle,
-        route = Screen.Account.route
+        route = Screen.LoggedIn.route
     )
 )
 
-
-@Preview
 @Composable
-fun BottomNavigationBar(navController: NavHostController)
+fun BottomNavigationBar(navController: NavController)
 {
     NavigationBar {
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route

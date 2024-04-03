@@ -20,8 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.filled.Label
-import androidx.compose.material3.*
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,9 +29,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import com.example.cis3515_1.Navigation.Screen
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -39,28 +36,24 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.cis3515_1.BottomNavigationBar
 import com.example.cis3515_1.DiscussionTopNavigationBar
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import kotlinx.coroutines.tasks.await
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.R
 
-
 @Composable
-fun Discussion(modifier: Modifier = androidx.compose.ui.Modifier, navController: NavHostController, selectedFilter: String, onClick:  suspend () -> Unit)
+fun LostAndFoundStaff(modifier: Modifier = androidx.compose.ui.Modifier, navController: NavHostController, selectedFilter: String, onClick: suspend () -> Unit)
 {
     val posts = remember { mutableStateOf<List<Post>>(emptyList()) }
 
     LaunchedEffect(selectedFilter) {
-        Log.d("Discussion", "Before fetching posts for filter: $selectedFilter")
+        Log.d("Lost & Found", "Before fetching posts for filter: $selectedFilter")
         posts.value = fetchPostsFromFirestore(selectedFilter)
-        Log.d("Discussion", "After fetching posts, selected filter: $selectedFilter, posts count: ${posts.value.size}")
+        Log.d("Lost & Found", "After fetching posts, selected filter: $selectedFilter, posts count: ${posts.value.size}")
     }
 
     Scaffold(
@@ -76,13 +69,13 @@ fun Discussion(modifier: Modifier = androidx.compose.ui.Modifier, navController:
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            DiscussionList(posts = posts.value, navController)
+            LostAndFoundList(posts = posts.value, navController)
         }
     }
 }
 
 @Composable
-fun DiscussionList(posts: List<Post>, navController: NavHostController) {
+fun LostAndFoundList(posts: List<Post>, navController: NavHostController) {
     LazyColumn {
         items(posts) { post ->
             Card(
@@ -179,41 +172,4 @@ fun DiscussionList(posts: List<Post>, navController: NavHostController) {
             }
         }
     }
-}
-
-fun Date.formatToString(): String {
-    val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-    return formatter.format(this)
-}
-
-suspend fun fetchPostsFromFirestore(selectedFilter: String = "All"): List<Post> {
-    val firestore = FirebaseFirestore.getInstance()
-    var query: Query = firestore.collection("posts")
-    val posts = mutableListOf<Post>()
-
-    if (selectedFilter != "All") {
-        query = query.whereEqualTo("category", selectedFilter)
-    }
-
-    try {
-        val snapshot = query.orderBy("date", Query.Direction.DESCENDING).get().await()
-        for (document in snapshot.documents) {
-            val post = Post(
-                id = document.id,
-                title = document.getString("title") ?: "",
-                content = document.getString("content") ?: "",
-                uid = document.getString("uid") ?: "",
-                userName = document.getString("userName") ?: "",
-                date = Date(document.getLong("date") ?: 0L),
-                commentNum = document.getLong("commentNum")?.toInt() ?: 0,
-                imageUrls = document.get("imageUrls") as List<String>? ?: emptyList(),
-                category = document.getString("category") ?: ""
-            )
-            posts.add(post)
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-
-    return posts
 }
