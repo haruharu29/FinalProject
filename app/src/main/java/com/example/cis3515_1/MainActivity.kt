@@ -24,7 +24,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -108,6 +112,8 @@ class MainActivity : ComponentActivity() {
                 val scope = rememberCoroutineScope()
                 val context = LocalContext.current
 
+                var selectedFilter by rememberSaveable { mutableStateOf("All")}
+
                 ModalNavigationDrawer(
                     gesturesEnabled = drawerState.isOpen, drawerContent = {
                         ModalDrawerSheet()
@@ -149,14 +155,14 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         topBar = {
                             // Conditionally display the TopNavigationBar based on the current route
-                            if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.Discussion.route) {
+                            if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.Discussion.route && currentRoute != Screen.AddPost.route&& currentRoute != Screen.PostDetail.route && currentRoute != Screen.DiscussionSearch.route) {
                                 TopNavigationBar (onClick = { drawerState.open() })
-                                //DiscussionTopNavigationBar(navController = navController, onFilterSelected = {it})
                             }
 
-                            else if(currentRoute == Screen.Discussion.route)
-                            {
-                                DiscussionTopNavigationBar(navController = navController, onFilterSelected = {}, onClick = {drawerState.open()})
+                            else if (currentRoute == Screen.Discussion.route && currentRoute == Screen.AddPost.route && currentRoute == Screen.PostDetail.route && currentRoute == Screen.DiscussionSearch.route) {
+                                DiscussionTopNavigationBar(
+                                    onFilterSelected = { filter -> selectedFilter = filter },
+                                    navController = navController, onClick = { drawerState.open() })
                             }
                         },
                         bottomBar = {
