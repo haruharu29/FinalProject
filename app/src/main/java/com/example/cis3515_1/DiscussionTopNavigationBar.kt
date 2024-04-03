@@ -19,11 +19,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.cis3515_1.Navigation.Screen
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +34,7 @@ fun DiscussionTopNavigationBar(
     onFilterSelected: (String) -> Unit,
     onClick:  suspend () -> Unit)
 {
+    val scope = rememberCoroutineScope()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     TopAppBar(colors = TopAppBarDefaults.topAppBarColors(),
         // top bar title
@@ -58,7 +61,7 @@ fun DiscussionTopNavigationBar(
         // icon on top left
         navigationIcon = {
             if (currentRoute == Screen.Discussion.route) {
-                IconButton(onClick = { onDiscussionNavigationIconClicked() }) {
+                IconButton(onClick = {scope.launch{onClick()}}) {
                     Icon(imageVector = Icons.Default.Menu, contentDescription = "Toggle Drawer")
                 }
             } else {

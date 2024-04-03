@@ -8,8 +8,9 @@ sealed class Screen(val route: String)
     object Club: Screen("club_screen")
     object UpcomingEvent: Screen("UpcomingEvent")
     object LogIn: Screen("LogIn")
+    object RegisterScreen: Screen("RegisterScreen")
     object CourseSchedule:  Screen("Course Schedule")
-    object Discussion: Screen("Discussion")
+    object Discussion: Screen("Discussion/{filter}")
     {
         fun createRoute(filter: String = "All") = "Discussion/$filter"
     }

@@ -25,6 +25,9 @@ import androidx.navigation.navArgument
 import com.example.cis3515_1.AccountScreen
 import com.example.cis3515_1.Screens.AddPostScreen
 import com.example.cis3515_1.BottomNavigationBar
+import com.example.cis3515_1.Notifications
+import com.example.cis3515_1.PostDetailScreen
+import com.example.cis3515_1.RegisterScreen
 import com.example.cis3515_1.Screens.AnimatedSplashScreen
 import com.example.cis3515_1.Screens.Clubs
 import com.example.cis3515_1.Screens.Contact
@@ -35,7 +38,6 @@ import com.example.cis3515_1.Screens.FloorGuide
 import com.example.cis3515_1.Screens.HomeScreen
 import com.example.cis3515_1.Screens.LogIn
 import com.example.cis3515_1.Screens.LostAndFoundStaff
-import com.example.cis3515_1.Screens.PostDetailScreen
 import com.example.cis3515_1.Screens.UpcomingEvent
 import com.example.cis3515_1.TopNavigationBar
 import com.google.firebase.Firebase
@@ -58,6 +60,11 @@ fun SetupNavGraph(onClick: suspend () -> Unit, navController: NavHostController)
             AccountScreen(navController = navController)
         }
 
+        composable(route = Screen.RegisterScreen.route)
+        {
+            RegisterScreen(navController = navController)
+        }
+
         composable(route = Screen.LoggedIn.route)
         {
             LogIn(userEmail = Firebase.auth.currentUser, onLogout =
@@ -69,6 +76,11 @@ fun SetupNavGraph(onClick: suspend () -> Unit, navController: NavHostController)
 
         composable(route = Screen.Home.route) {
             HomeScreen(onClick = onClick, navController = navController)
+        }
+
+        composable(route = Screen.Notifications.route)
+        {
+            Notifications(navController = navController)
         }
 
         composable(route = Screen.Club.route)
@@ -129,7 +141,7 @@ fun SetupNavGraph(onClick: suspend () -> Unit, navController: NavHostController)
 
         composable(route = Screen.PostDetail.route, arguments = listOf(navArgument("postId") { type = NavType.StringType }))
         { backStackEntry ->
-            PostDetailScreen(postId = backStackEntry.arguments?.getString("postId") ?: "", navController = navController, onClick = onClick)
+            PostDetailScreen(postId = backStackEntry.arguments?.getString("postId") ?: "", navController = navController)
         }
 
         composable(route = Screen.DiscussionSearch.route)

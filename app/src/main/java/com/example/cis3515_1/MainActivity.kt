@@ -24,7 +24,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -52,6 +56,7 @@ class MainActivity : ComponentActivity() {
                 SetBarColor(color = MaterialTheme.colorScheme.background)
 
                 val navController = rememberNavController()
+                var selectedFilter by rememberSaveable { mutableStateOf("All") }
 
                 // Listen to the back stack to determine the current route
                 val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
@@ -149,19 +154,22 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         topBar = {
                             // Conditionally display the TopNavigationBar based on the current route
-                            if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.Discussion.route) {
+
+                            if (currentRoute == Screen.Discussion.route || currentRoute == Screen.AddPost.route || currentRoute == Screen.PostDetail.route || currentRoute == Screen.DiscussionSearch.route) {
+                                DiscussionTopNavigationBar(
+                                    onFilterSelected = { filter -> selectedFilter = filter },
+                                    navController = navController, onClick = {drawerState.open()})
+                            }
+
+                            else if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.Discussion.route && currentRoute != Screen.RegisterScreen.route) {
                                 TopNavigationBar (onClick = { drawerState.open() })
                                 //DiscussionTopNavigationBar(navController = navController, onFilterSelected = {it})
                             }
 
-                            else if(currentRoute == Screen.Discussion.route)
-                            {
-                                DiscussionTopNavigationBar(navController = navController, onFilterSelected = {}, onClick = {drawerState.open()})
-                            }
                         },
                         bottomBar = {
                             // Conditionally display the BottomNavigationBar based on the current route
-                            if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route) {
+                            if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.RegisterScreen.route) {
                                 BottomNavigationBar(navController)
                             }
 

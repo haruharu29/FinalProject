@@ -64,11 +64,6 @@ fun Discussion(modifier: Modifier = androidx.compose.ui.Modifier, navController:
     }
 
     Scaffold(
-        topBar = { DiscussionTopNavigationBar(
-            navController = navController,
-            onFilterSelected = {}
-        ) { onClick }
-        },
         bottomBar = { BottomNavigationBar(navController) }
     ) { padding ->
         Column(

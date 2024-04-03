@@ -168,7 +168,7 @@ fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navCo
                                     .width(180.dp)
                                     .padding(top =10.dp, bottom = 10.dp, start = 10.dp),
                                 elevation = CardDefaults.cardElevation(10.dp),
-                                onClick = { navController.navigate(Screen.Discussion.route) }
+                                onClick = {  navController.navigate(Screen.Discussion.createRoute("All"))}
                             )
                             {
                                 Box(

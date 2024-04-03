@@ -74,6 +74,7 @@ fun AccountScreen(modifier: Modifier = Modifier, navController: NavHostControlle
         bottomBar = {},
     )
     { paddingValues ->
+        //        if(user != null && user.isEmailVerified)
         if (user != null)
         {
             LoggedInScreen(userEmail, onLogout =
@@ -168,27 +169,8 @@ fun AccountScreen(modifier: Modifier = Modifier, navController: NavHostControlle
 
                 TextButton(onClick =
                 {
-                  if ((userEmail.endsWith("@temple.edu"))||(userEmail.endsWith("@tuj.temple.edu"))) {
-                     registerUser(userEmail, password)
-                     { success, message ->
-                            if (success)
-                            {
-                                errorMessage = ""
-                                navController.navigate(Screen.Account.route)
-                                userEmail = userEmail
-                            }
+                    navController.navigate(Screen.RegisterScreen.route)
 
-                            else
-                            {
-                                errorMessage = message
-                            }
-                     }
-                  }
-
-                  else
-                  {
-                      errorMessage = "Please use a @temple.edu email address"
-                  }
                 })
                 {
                     Text("No account? Register")
@@ -205,31 +187,22 @@ fun PreviewAccountScreen()
     AccountScreen(modifier = Modifier, navController = rememberNavController())
 }
 
-fun registerUser(email: String, password: String, onResult: (Boolean, String) -> Unit) {
-    val auth = Firebase.auth
-    auth.createUserWithEmailAndPassword(email, password)
-        .addOnCompleteListener { task ->
-            if(task.isSuccessful)
-            {
-                onResult(true, "Registration successful")
-            }
-            else
-            {
-                onResult(false, task.exception?.message ?: "Registration failed")
-            }
-        }
-}
 
 fun loginUser(email: String, password: String, onResult: (Boolean, String) -> Unit) {
     val auth = Firebase.auth
     auth.signInWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
-            if(task.isSuccessful)
-            {
-                onResult(true, "Login successful")
-            }
-            else
-            {
+            if (task.isSuccessful) {
+                val user = auth.currentUser
+                if (user != null)
+//                if (user != null && user.isEmailVerified)
+                {
+                    onResult(true, "Login successful")
+                } else {
+                    auth.signOut()
+                    onResult(false, "Please verify your email address before logging in.")
+                }
+            } else {
                 onResult(false, task.exception?.message ?: "Login failed")
             }
         }

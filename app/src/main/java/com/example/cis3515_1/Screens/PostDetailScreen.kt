@@ -1,8 +1,13 @@
-package com.example.cis3515_1.Screens
+package com.example.cis3515_1
 
+import Model.Comment
+import Model.CommentToComment
+import Model.Notification
+import Model.Post
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -23,6 +28,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.AddComment
@@ -41,11 +47,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +71,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.cis3515_1.Navigation.Screen
+import com.example.cis3515_1.Screens.formatToString
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -70,28 +79,25 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
-import Model.Comment
-import Model.CommentToComment
-import Model.Post
-import com.example.cis3515_1.BottomNavigationBar
-import com.example.cis3515_1.DiscussionTopNavigationBar
-import com.example.cis3515_1.R
 import java.util.Date
 
 
 @Composable
-fun PostDetailScreen(postId: String, navController: NavHostController, onClick: suspend () -> Unit)
+fun PostDetailScreen(postId: String, navController: NavHostController)
 {
     var post by remember { mutableStateOf<Post?>(null) }
+    val scope = rememberCoroutineScope()
 
     val comments = remember { mutableStateOf<List<Comment>>(emptyList()) }
     val currentUserId = Firebase.auth.currentUser?.email ?: ""
 
+    // Fetch post details and comments whenever postId changes
     LaunchedEffect(postId) {
         comments.value = fetchCommentsFromFirestore(postId).sortedBy { it.date }
         post = fetchPostFromFirestore(postId)
     }
 
+    // Display selected image for comment dialog
     var selectedImageUrl by remember { mutableStateOf<String?>(null) }
 
     if (selectedImageUrl != null) {
@@ -108,6 +114,7 @@ fun PostDetailScreen(postId: String, navController: NavHostController, onClick: 
         }
     }
 
+    // for comments
     var showDialog by remember { mutableStateOf(false) }
     var showDeletePostDialog by remember { mutableStateOf(false) }
     var userName by remember { mutableStateOf("") }
@@ -123,6 +130,7 @@ fun PostDetailScreen(postId: String, navController: NavHostController, onClick: 
 
     var userNameEditable by remember { mutableStateOf(true) }
 
+    // Load the username for the post, and manage editability
     LaunchedEffect(key1 = showDialog) {
         if (showDialog) {
             userName = getOrSetUsernameForPost(postId, currentUserId, null) ?: ""
@@ -130,6 +138,8 @@ fun PostDetailScreen(postId: String, navController: NavHostController, onClick: 
         }
     }
 
+
+    // Show a dialog for adding a new comment
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
@@ -178,13 +188,15 @@ fun PostDetailScreen(postId: String, navController: NavHostController, onClick: 
                 Button(
                     onClick = {
                         showDialog = false
-                        uploadComment(
-                            postId = postId,
-                            content = content,
-                            proposedUserName = userName,
-                            imageUris = imageUris,
-                            navController = navController
-                        )
+                        scope.launch {
+                            uploadComment(
+                                postId = postId,
+                                content = content,
+                                proposedUserName = userName,
+                                imageUris = imageUris,
+                                navController = navController
+                            )
+                        }
                     }
                 ) {
                     Text("Post Comment")
@@ -199,10 +211,7 @@ fun PostDetailScreen(postId: String, navController: NavHostController, onClick: 
     }
 
     Scaffold(
-        topBar = { DiscussionTopNavigationBar(
-            navController = navController,
-            onFilterSelected = {}) { onClick }
-        },
+        topBar = { DiscussionTopNavigationBar( onFilterSelected = {}, navController = navController, onClick = {})},
         bottomBar = { BottomNavigationBar(navController) },
         floatingActionButton = {
             FloatingActionButton(onClick = { showDialog = true }) {
@@ -210,6 +219,7 @@ fun PostDetailScreen(postId: String, navController: NavHostController, onClick: 
             }
         }
     ) { padding ->
+        // Display the post
         LazyColumn(modifier = Modifier.padding(padding)) {
             if (post != null) {
                 item {
@@ -316,6 +326,7 @@ fun PostDetailScreen(postId: String, navController: NavHostController, onClick: 
                 }
             }
 
+            // Display comments
             if (comments.value.isNotEmpty()) {
                 items(comments.value) { comment ->
                     CommentItem(
@@ -327,7 +338,9 @@ fun PostDetailScreen(postId: String, navController: NavHostController, onClick: 
                             deleteComment(comment.postId, comment.id, navController)
                         },
                         onReply = { postId, userName, replyContent, commentId ->
-                            uploadReply(postId, userName, replyContent, commentId, navController)
+                            scope.launch {
+                                uploadReply(postId, userName, replyContent, commentId, navController)
+                            }
                         }
                     )
                 }
@@ -356,10 +369,13 @@ fun CommentItem(comment: Comment,
     var selectedReplyId by remember { mutableStateOf("") }
     var userNameEditable by remember { mutableStateOf(true) }
 
+
+    // Fetch replies when the comment ID changes
     LaunchedEffect(comment.id) {
         replies = fetchRepliesForComment(comment.postId, comment.id)
     }
 
+    // Show reply input dialog
     if (showDialogForReply) {
         ReplyInputDialog(
             onDismissRequest = { showDialogForReply = false },
@@ -376,6 +392,7 @@ fun CommentItem(comment: Comment,
         )
     }
 
+    // Comment card
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -388,13 +405,14 @@ fun CommentItem(comment: Comment,
         ) {
             Column(modifier = Modifier.padding(16.dp).weight(1f)) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(36.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 )
                 {
                     Text(
-                        text = "Posted by: ${comment.userName}"
+                        text = "Posted by: ${comment.userName}",
+                        fontSize = 20.sp,
                     )
 
 
@@ -437,14 +455,14 @@ fun CommentItem(comment: Comment,
                     fontSize = 16.sp,
                     color = Color.Gray
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
                     text = comment.content,
-                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     fontSize = 18.sp
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 comment.imageUrls.forEach { imageUrl ->
                     AsyncImage(
                         model = imageUrl,
@@ -458,7 +476,7 @@ fun CommentItem(comment: Comment,
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-
+                // Replies
                 Column {
                     replies.sortedBy { it.date }.forEach { reply ->
                         Card(
@@ -517,6 +535,7 @@ fun CommentItem(comment: Comment,
 
 suspend fun fetchPostFromFirestore(postId: String): Post? {
     val firestore = FirebaseFirestore.getInstance()
+    // Attempt to fetch the document snapshot for the given postId
     try {
         val documentSnapshot = firestore.collection("posts").document(postId).get().await()
         if (documentSnapshot.exists()) {
@@ -544,6 +563,7 @@ suspend fun fetchCommentsFromFirestore(postId: String): List<Comment> {
     val firestore = FirebaseFirestore.getInstance()
     val comments = mutableListOf<Comment>()
 
+    // Attempt to fetch the Comments snapshot for the given postId
     try {
         val snapshot = firestore.collection("posts").document(postId)
             .collection("comments").orderBy("date", Query.Direction.DESCENDING)
@@ -572,9 +592,25 @@ fun deleteComment(postId: String, commentId: String, navController: NavControlle
     GlobalScope.launch(Dispatchers.IO) {
         try {
             val firestore = FirebaseFirestore.getInstance()
+            // Reference to the specific comment in Firestore
             val commentRef = firestore.collection("posts").document(postId).collection("comments").document(commentId)
             val repliesCount = commentRef.collection("replies").get().await().size()
 
+            // Delete all replies associated with the comment
+            val repliesSnapshot = commentRef.collection("replies").get().await()
+            repliesSnapshot.forEach { replySnapshot ->
+                replySnapshot.reference.delete().await()
+            }
+
+            firestore.collectionGroup("notifications")
+                .whereEqualTo("commentId", commentId)
+                .get()
+                .await()
+                .forEach { notificationSnapshot ->
+                    notificationSnapshot.reference.delete().await()
+                }
+
+            // Update the comments count in the post
             firestore.runTransaction { transaction ->
                 val postRef = firestore.collection("posts").document(postId)
 
@@ -603,7 +639,7 @@ fun deleteComment(postId: String, commentId: String, navController: NavControlle
     }
 }
 
-fun uploadComment(
+suspend fun uploadComment(
     postId: String,
     content: String,
     proposedUserName: String,
@@ -614,7 +650,13 @@ fun uploadComment(
     val storageRef = FirebaseStorage.getInstance().reference
     val userEmail = Firebase.auth.currentUser?.email ?: ""
 
+    // Reference to the specific post
+    val postRef = firestore.collection("posts").document(postId)
+    val postSnapshot = postRef.get().await()
+    val postOwnerId = postSnapshot.getString("uid")
+
     CoroutineScope(Dispatchers.IO).launch {
+        // Set or get username for the comment based on the proposedUserName
         val userName = getOrSetUsernameForPost(postId, userEmail, proposedUserName)
         val imageUrls = imageUris.mapNotNull { uri ->
             val imageRef = storageRef.child("comments/${postId}/${System.currentTimeMillis()}_${uri.lastPathSegment}")
@@ -631,15 +673,32 @@ fun uploadComment(
             "imageUrls" to imageUrls
         )
 
+        // Update the comment count
         firestore.runTransaction { transaction ->
             val postSnapshot = transaction.get(firestore.collection("posts").document(postId))
             val currentCommentNum = postSnapshot.getLong("commentNum") ?: 0
             transaction.update(firestore.collection("posts").document(postId), "commentNum", currentCommentNum + 1)
         }.await()
 
+        // for notification
         firestore.collection("posts").document(postId)
-            .collection("comments").add(comment)
-            .await()
+            .collection("comments").add(comment).await().let {
+                val postSnapshot = firestore.collection("posts").document(postId).get().await()
+                val postOwnerId = postSnapshot.getString("uid")
+                if (userEmail != postOwnerId) {
+                    val notification = Notification(
+                        postId = postId,
+                        senderId = userEmail,
+                        senderName = userName,
+                        type = "postReply",
+                        contentPreview = content.take(100),
+                        date = Date(System.currentTimeMillis()),
+                        exists = true
+                    )
+                    createNotificationForUser(postOwnerId!!, notification)
+                }
+            }
+
 
         withContext(Dispatchers.Main) {
             navController.popBackStack()
@@ -659,17 +718,33 @@ fun deletePost(postId: String, navController: NavController) {
 
     GlobalScope.launch(Dispatchers.IO) {
         try {
+            // Delete all comments associated with the post
+            val commentsCollectionPath = firestore.collection("posts").document(postId).collection("comments")
+            val commentsSnapshot = commentsCollectionPath.get().await()
+            commentsSnapshot.forEach { commentSnapshot ->
+                commentSnapshot.reference.delete().await()
+            }
+
+            // Delete all usernames (if applicable) associated with the post
+            val usernamesCollectionPath = firestore.collection("posts").document(postId).collection("usernames")
+            val usernamesSnapshot = usernamesCollectionPath.get().await()
+            usernamesSnapshot.forEach { usernameSnapshot ->
+                usernameSnapshot.reference.delete().await()
+            }
+
             firestore.collection("posts").document(postId).delete().await()
+
             withContext(Dispatchers.Main) {
                 navController.popBackStack()
             }
-        } catch (e: Exception) {
+        }
+        catch (e: Exception) {
             e.printStackTrace()
         }
     }
 }
 
-fun uploadReply(
+suspend fun uploadReply(
     postId: String,
     proposedUserName: String,
     replyContent: String,
@@ -679,38 +754,56 @@ fun uploadReply(
     val firestore = FirebaseFirestore.getInstance()
     val userEmail = Firebase.auth.currentUser?.email ?: ""
 
-    CoroutineScope(Dispatchers.IO).launch {
-        val userName = getOrSetUsernameForPost(postId, userEmail, proposedUserName)
+    val userName = getOrSetUsernameForPost(postId, userEmail, proposedUserName)
 
-        val reply = hashMapOf(
-            "commentId" to commentId,
-            "content" to replyContent,
-            "uid" to userEmail,
-            "userName" to userName,
-            "date" to System.currentTimeMillis(),
-        )
+    val reply = hashMapOf(
+        "commentId" to commentId,
+        "content" to replyContent,
+        "uid" to userEmail,
+        "userName" to userName,
+        "date" to System.currentTimeMillis(),
+    )
 
-        firestore.runTransaction { transaction ->
-            val postSnapshot = transaction.get(firestore.collection("posts").document(postId))
-            val currentCommentNum = postSnapshot.getLong("commentNum") ?: 0
-            transaction.update(firestore.collection("posts").document(postId), "commentNum", currentCommentNum + 1)
-        }.await()
+    // Increment the comment count on the post
+    firestore.runTransaction { transaction ->
+        val postSnapshot = transaction.get(firestore.collection("posts").document(postId))
+        val currentCommentNum = postSnapshot.getLong("commentNum") ?: 0
+        transaction.update(firestore.collection("posts").document(postId), "commentNum", currentCommentNum + 1)
+    }.await()
 
-        firestore.collection("posts").document(postId)
-            .collection("comments").document(commentId)
-            .collection("replies").add(reply)
-            .await()
+    val commentSnapshot = firestore.collection("posts").document(postId)
+        .collection("comments").document(commentId).get().await()
+    val commentOwnerId = commentSnapshot.getString("uid")
 
-        withContext(Dispatchers.Main) {
-            navController.popBackStack()
-            val route = Screen.PostDetail.createRoute(postId)
-            navController.navigate(route) {
-                popUpTo(route) { inclusive = true }
-                launchSingleTop = true
-                restoreState = true
+    // for notification
+    firestore.collection("posts").document(postId)
+        .collection("comments").document(commentId)
+        .collection("replies").add(reply).await().let {
+            if (userEmail != commentOwnerId) {
+                val notification = Notification(
+                    postId = postId,
+                    commentId = commentId,
+                    senderId = userEmail,
+                    senderName = userName,
+                    type = "commentReply",
+                    contentPreview = replyContent.take(100),
+                    date = Date(System.currentTimeMillis()),
+                    exists = true
+                )
+                createNotificationForUser(commentOwnerId!!, notification)
             }
         }
+
+    withContext(Dispatchers.Main) {
+        navController.popBackStack()
+        val route = Screen.PostDetail.createRoute(postId)
+        navController.navigate(route) {
+            popUpTo(route) { inclusive = true }
+            launchSingleTop = true
+            restoreState = true
+        }
     }
+
 }
 
 @Composable
@@ -723,6 +816,7 @@ fun ReplyInputDialog(
     onReplyContentChange: (String) -> Unit,
     onUserNameChange: (String) -> Unit
 ) {
+    // Display a dialog allowing the user to input their reply
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = { Text(text = "Reply to Comment") },
@@ -767,6 +861,7 @@ suspend fun fetchRepliesForComment(postId: String, commentId: String): List<Comm
     val replies = mutableListOf<CommentToComment>()
 
     try {
+        // Fetch the replies for a specific comment ordered by date
         val snapshot = firestore.collection("posts").document(postId)
             .collection("comments").document(commentId)
             .collection("replies").orderBy("date", Query.Direction.ASCENDING)
@@ -795,12 +890,14 @@ fun deleteReply(postId: String, commentId: String, replyId: String, navControlle
 
     GlobalScope.launch(Dispatchers.IO) {
         try {
+            // Reference to the specific reply to be deleted
             val replyRef = firestore.collection("posts").document(postId)
                 .collection("comments").document(commentId)
                 .collection("replies").document(replyId)
 
             replyRef.delete().await()
 
+            // Update the comment count
             val postRef = firestore.collection("posts").document(postId)
             firestore.runTransaction { transaction ->
                 val postSnapshot = transaction.get(postRef)
