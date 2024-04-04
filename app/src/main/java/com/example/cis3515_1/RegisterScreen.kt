@@ -18,6 +18,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -85,6 +87,7 @@ fun RegisterScreen(modifier: Modifier = Modifier, navController: NavHostControll
                 value = userEmail,
                 onValueChange = { userEmail = it },
                 label = { Text("Email Address") },
+                leadingIcon = {Icon(Icons.Rounded.AccountCircle, null)},
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -92,6 +95,7 @@ fun RegisterScreen(modifier: Modifier = Modifier, navController: NavHostControll
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
+                leadingIcon = {Icon(Icons.Rounded.Key, null)},
                 label = { Text("Password") },
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -113,6 +117,7 @@ fun RegisterScreen(modifier: Modifier = Modifier, navController: NavHostControll
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
+                leadingIcon = {Icon(Icons.Rounded.Key, null)},
                 label = { Text("Confirm Password") },
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
