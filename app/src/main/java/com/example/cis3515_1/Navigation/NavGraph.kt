@@ -29,6 +29,7 @@ import com.example.cis3515_1.BottomNavigationBar
 import com.example.cis3515_1.Notifications
 import com.example.cis3515_1.PostDetailScreen
 import com.example.cis3515_1.RegisterScreen
+import com.example.cis3515_1.Screens.AddClubScreen
 import com.example.cis3515_1.Screens.AddPostLostAndFoundScreen
 import com.example.cis3515_1.Screens.AddPostScreen
 import com.example.cis3515_1.Screens.AddPostStudentResources
@@ -93,6 +94,12 @@ fun SetupNavGraph(onClick: suspend () -> Unit, navController: NavHostController)
         {
             Clubs(onClick = onClick, navController = navController)
         }
+
+        composable(route = Screen.AddClub.route)
+        {
+            AddClubScreen(onClick = onClick, navController = navController)
+        }
+
 
         composable(route = Screen.UpcomingEvent.route)
         {
@@ -202,7 +209,7 @@ fun SetupNavGraph(onClick: suspend () -> Unit, navController: NavHostController)
 @Composable
 fun WebViewScreen(url: String, modifier: Modifier = Modifier, onClick: suspend () -> Unit, navController: NavHostController)
 {
-    Scaffold(topBar = { TopNavigationBar(onClick = onClick) }, bottomBar = { BottomNavigationBar(navController) })
+    Scaffold(topBar = { TopNavigationBar(onClick = onClick, navController = navController) }, bottomBar = { BottomNavigationBar(navController) })
     { padding ->
         Column(
             modifier = Modifier

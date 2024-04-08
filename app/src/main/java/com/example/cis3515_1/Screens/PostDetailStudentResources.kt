@@ -26,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,6 +54,7 @@ import com.example.cis3515_1.BottomNavigationBar
 import com.example.cis3515_1.DiscussionTopNavigationBar
 import com.example.cis3515_1.R
 import com.example.cis3515_1.ui.theme.Red01
+import com.example.cis3515_1.ui.theme.Red06
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -120,7 +122,7 @@ fun PostDetailScreen_StudentResources(postId: String, navController: NavHostCont
     Scaffold(
         topBar = { DiscussionTopNavigationBar( onFilterSelected = {}, navController = navController, onClick = {}) },
         bottomBar = { BottomNavigationBar(navController) }
-    ) { padding ->
+    ){ padding ->
         // Display the post
         LazyColumn(modifier = Modifier.padding(padding)) {
             if (post != null) {
@@ -137,36 +139,6 @@ fun PostDetailScreen_StudentResources(postId: String, navController: NavHostCont
                                 fontSize = 34.sp,
                                 lineHeight = 40.sp
                             )
-
-                            if (currentUserId == post!!.uid) {
-                                IconButton(onClick =
-                                {
-                                    showDeletePostDialog = true
-                                }) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Delete Post")
-                                }
-
-                                if (showDeletePostDialog) {
-                                    AlertDialog(
-                                        onDismissRequest = { showDeletePostDialog = false },
-                                        title = { Text("Delete Post") },
-                                        text = { Text("Are you sure you want to delete this post?") },
-                                        confirmButton = {
-                                            Button(onClick = {
-                                                deletePostStudentResources(postId, navController)
-                                                showDeletePostDialog = false
-                                            }, colors = ButtonDefaults.buttonColors(containerColor = Red01)) {
-                                                Text("Delete")
-                                            }
-                                        },
-                                        dismissButton = {
-                                            Button(onClick = { showDeletePostDialog = false }, colors = ButtonDefaults.buttonColors(containerColor = Red01)) {
-                                                Text("Cancel")
-                                            }
-                                        }
-                                    )
-                                }
-                            }
                         }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -183,6 +155,10 @@ fun PostDetailScreen_StudentResources(postId: String, navController: NavHostCont
                                 fontSize = 18.sp
                             )
                         }
+
+                        
+                            //Spacer(modifier = Modifier.size(5.dp))
+
                         Text(
                             text = "Posted on: ${post!!.date.formatToString()}",
                             fontSize = 18.sp,
@@ -193,11 +169,13 @@ fun PostDetailScreen_StudentResources(postId: String, navController: NavHostCont
                             fontSize = 18.sp,
                             color = Color.Gray
                         )
+                        
                         Text(
                             text = post!!.content,
                             overflow = TextOverflow.Ellipsis,
                             fontSize = 20.sp
                         )
+
                         Spacer(modifier = Modifier.height(8.dp))
 
                         post!!.imageUrls.forEach { imageUrl ->
@@ -213,6 +191,38 @@ fun PostDetailScreen_StudentResources(postId: String, navController: NavHostCont
                                     .clip(RoundedCornerShape(6.dp))
                             )
                         }
+
+                        val userEmail = Firebase.auth.currentUser?.email ?: ""
+
+                        if (userEmail.endsWith("@tuj.temple.edu"))
+                        {
+                            IconButton(onClick = { showDeletePostDialog = true}, modifier = Modifier.align(Alignment.End).size(70.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor =  Red06))
+                            {
+                                Icon(Icons.Default.Delete, contentDescription = "Delete Post", modifier = Modifier.size(50.dp) )
+                            }
+
+                            if (showDeletePostDialog) {
+                                AlertDialog(
+                                    onDismissRequest = { showDeletePostDialog = false },
+                                    title = { Text("Delete Post") },
+                                    text = { Text("Are you sure you want to delete this post?") },
+                                    confirmButton = {
+                                        Button(onClick = {
+                                            deletePostStudentResources(postId, navController)
+                                            showDeletePostDialog = false
+                                        }, colors = ButtonDefaults.buttonColors(containerColor = Red01)) {
+                                            Text("Delete")
+                                        }
+                                    },
+                                    dismissButton = {
+                                        Button(onClick = { showDeletePostDialog = false }, colors = ButtonDefaults.buttonColors(containerColor = Red01)) {
+                                            Text("Cancel")
+                                        }
+                                    }
+                                )
+                            }
+                        }
+
                     }
                 }
             } else {

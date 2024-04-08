@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +49,7 @@ import com.example.cis3515_1.BottomNavigationBar
 import com.example.cis3515_1.DiscussionTopNavigationBar
 import com.example.cis3515_1.R
 import com.example.cis3515_1.ui.theme.Red01
+import com.example.cis3515_1.ui.theme.Red06
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -112,16 +115,16 @@ fun PostDetailScreen_LostAndFound(postId: String, navController: NavHostControll
                                 text = post!!.title,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 34.sp,
-                                lineHeight = 40.sp
+                                lineHeight = 40.sp,
                             )
 
                             val userEmail = Firebase.auth.currentUser?.email ?: ""
 
                             if (userEmail.endsWith("@tuj.temple.edu"))
                             {
-                                IconButton(onClick = { showDeletePostDialog = true}, )
+                                IconButton(onClick = { showDeletePostDialog = true}, modifier = Modifier.size(70.dp).padding(10.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor =  Red06))
                                 {
-                                    Icon(Icons.Default.Delete, contentDescription = "Delete Post")
+                                    Icon(Icons.Default.Delete, contentDescription = "Delete Post", Modifier.size(40.dp))
                                 }
                             }
 

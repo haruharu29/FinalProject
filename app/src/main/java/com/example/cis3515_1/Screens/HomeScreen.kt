@@ -37,7 +37,7 @@ fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navCo
     Column(horizontalAlignment = Alignment.CenterHorizontally)
     {
         Scaffold(
-            topBar = { TopNavigationBar(onClick = onClick) },
+            topBar = { TopNavigationBar(onClick = onClick, navController = navController) },
             bottomBar = { BottomNavigationBar(navController) })
         { padding ->
             Column(

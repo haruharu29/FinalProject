@@ -1,5 +1,6 @@
 package com.example.cis3515_1
 
+import Model.NavigationItem
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Toast
@@ -39,7 +40,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cis3515_1.Navigation.NavBarBody
 import com.example.cis3515_1.Navigation.NavBarHeader
-import Model.NavigationItem
 import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.Navigation.SetupNavGraph
 import com.example.cis3515_1.ui.theme.Cis3515_1Theme
@@ -91,7 +91,7 @@ class MainActivity : ComponentActivity() {
                     ),
                     NavigationItem(
                         title = "Student Resources",
-                        route = Screen.StudentResources.route,
+                        route = Screen.StudentResources.createRoute("All"),
                         selectedIcon = Icons.Filled.Accessibility,
                         unselectedIcon = Icons.Outlined.Accessibility
                     ),
@@ -164,7 +164,7 @@ class MainActivity : ComponentActivity() {
 
                             else if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.Discussion.route && currentRoute != Screen.RegisterScreen.route && currentRoute != Screen.AddPostStudentResources.route && currentRoute != Screen.StudentResources.route && currentRoute != Screen.PostDetail_StudentResources.route && currentRoute != Screen.StudentResourcesSearch.route)
                             {
-                                TopNavigationBar (onClick = { drawerState.open() })
+                                TopNavigationBar (onClick = { drawerState.open()}, navController = navController)
                                 //DiscussionTopNavigationBar(navController = navController, onFilterSelected = {it})
                             }
 

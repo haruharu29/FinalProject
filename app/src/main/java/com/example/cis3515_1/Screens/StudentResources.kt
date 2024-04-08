@@ -153,7 +153,7 @@ suspend fun fetchPostsFromFirestoreStudentResourcesCategory(selectedFilter: Stri
     val posts = mutableListOf<StudentResources>()
 
     if (selectedFilter != "All") {
-        query = query.whereEqualTo("category", selectedFilter)
+        query = query.whereEqualTo("date", selectedFilter)
     }
 
     try {
