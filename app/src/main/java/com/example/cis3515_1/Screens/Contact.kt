@@ -31,7 +31,7 @@ import com.example.cis3515_1.TopNavigationBar
 @Composable
 fun Contact(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navController: NavHostController)
 {
-    Scaffold(topBar = { TopNavigationBar(onClick = onClick) }, bottomBar = { BottomNavigationBar(navController) })
+    Scaffold(topBar = { TopNavigationBar(onClick = onClick, navController = navController) }, bottomBar = { BottomNavigationBar(navController) })
     { padding ->
         Column(
             modifier = Modifier

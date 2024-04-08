@@ -28,6 +28,7 @@ import com.example.cis3515_1.BottomNavigationBar
 import com.example.cis3515_1.Notifications
 import com.example.cis3515_1.PostDetailScreen
 import com.example.cis3515_1.RegisterScreen
+import com.example.cis3515_1.Screens.AddClubScreen
 import com.example.cis3515_1.Screens.AnimatedSplashScreen
 import com.example.cis3515_1.Screens.Clubs
 import com.example.cis3515_1.Screens.Contact
@@ -88,6 +89,11 @@ fun SetupNavGraph(onClick: suspend () -> Unit, navController: NavHostController)
             Clubs(onClick = onClick, navController = navController)
         }
 
+        composable(route = Screen.AddClub.route)
+        {
+            AddClubScreen(onClick = onClick, navController = navController)
+        }
+
         composable(route = Screen.UpcomingEvent.route)
         {
             UpcomingEvent(onClick = onClick, navController = navController)
@@ -98,10 +104,10 @@ fun SetupNavGraph(onClick: suspend () -> Unit, navController: NavHostController)
             CourseSchedule(onClick = onClick, navController = navController)
         }
 
-        composable(route = Screen.Contact.route)
-        {
-            Contact(onClick = onClick, navController = navController)
-        }
+//        composable(route = Screen.Contact.route)
+//        {
+//            Contact(onClick = onClick, navController = navController)
+//        }
 
         composable(route = Screen.FloorGuide.route)
         {
@@ -123,6 +129,16 @@ fun SetupNavGraph(onClick: suspend () -> Unit, navController: NavHostController)
         composable(route = Screen.CourseSchedule.route)
         {
             WebViewScreen(url = "https://www.tuj.ac.jp/ug/academics/semester-info/schedule", onClick = onClick, navController = navController)
+        }
+
+        composable(route = Screen.AcademicCalendar.route)
+        {
+            WebViewScreen(url = "https://www.tuj.ac.jp/ug/academics/semester-info/calendar", onClick = onClick, navController = navController)
+        }
+
+        composable(route = Screen.Contact.route)
+        {
+            WebViewScreen(url = "https://www.tuj.ac.jp/ug/contact", onClick = onClick, navController = navController)
         }
 
         composable(
@@ -163,7 +179,7 @@ fun SetupNavGraph(onClick: suspend () -> Unit, navController: NavHostController)
 @Composable
 fun WebViewScreen(url: String, modifier: Modifier = Modifier, onClick: suspend () -> Unit, navController: NavHostController)
 {
-    Scaffold(topBar = { TopNavigationBar(onClick = onClick) }, bottomBar = { BottomNavigationBar(navController) })
+    Scaffold(topBar = { TopNavigationBar(onClick = onClick, navController = navController) }, bottomBar = { BottomNavigationBar(navController) })
     { padding ->
         Column(
             modifier = Modifier

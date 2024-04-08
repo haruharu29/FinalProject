@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -35,6 +36,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.cis3515_1.DiscussionTopNavigationBar
 import com.example.cis3515_1.getOrSetUsernameForPost
+import com.example.cis3515_1.ui.theme.Red01
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -146,6 +148,7 @@ fun AddPostScreen(modifier: Modifier = Modifier, navController: NavController, o
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = { pickImagesLauncher.launch(arrayOf("image/*")) },
+                colors = ButtonDefaults.buttonColors(containerColor = Red01),
                 shape = RoundedCornerShape(8.dp),) {
                 Text("Choose Image")
             }
@@ -174,6 +177,7 @@ fun AddPostScreen(modifier: Modifier = Modifier, navController: NavController, o
                     )
                 },
                 shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Red01),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Submit")

@@ -124,5 +124,6 @@ dependencies {
 
     // Preferences DataStore (SharedPreferences like APIs)
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation ("com.google.firebase:firebase-appcheck-safetynet:16.1.2")
 
 }

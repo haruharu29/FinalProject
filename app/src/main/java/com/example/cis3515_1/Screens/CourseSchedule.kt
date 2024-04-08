@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 @Composable
 fun CourseSchedule(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navController: NavHostController)
 {
-    Scaffold(topBar = { TopNavigationBar(onClick = onClick) }, bottomBar = { BottomNavigationBar(navController) })
+    Scaffold(topBar = { TopNavigationBar(onClick = onClick, navController = navController) }, bottomBar = { BottomNavigationBar(navController) })
     { padding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(padding)

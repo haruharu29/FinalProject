@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
                     ),
                     NavigationItem(
                         title = "Academic Calendar",
-                        route = Screen.Club.route,
+                        route = Screen.AcademicCalendar.route,
                         selectedIcon = Icons.Filled.CalendarMonth,
                         unselectedIcon =  Icons.Outlined.CalendarMonth
                     ),
@@ -162,7 +162,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             else if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.Discussion.route && currentRoute != Screen.RegisterScreen.route) {
-                                TopNavigationBar (onClick = { drawerState.open() })
+                                TopNavigationBar (onClick = { drawerState.open() }, navController = navController)
                                 //DiscussionTopNavigationBar(navController = navController, onFilterSelected = {it})
                             }
 

@@ -65,7 +65,7 @@ fun Notifications(modifier: androidx.compose.ui.Modifier = androidx.compose.ui.M
         }
     }
     Scaffold(
-        topBar = { TopNavigationBar(onClick = {}) },
+        topBar = { TopNavigationBar(onClick = {}, navController = navController) },
         bottomBar = { BottomNavigationBar(navController) })
     { padding ->
         Column(
