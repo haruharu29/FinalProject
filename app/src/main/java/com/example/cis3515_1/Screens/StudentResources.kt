@@ -1,6 +1,6 @@
 package com.example.cis3515_1.Screens
 
-import Model.Post
+import Model.StudentResources
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -31,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,20 +45,17 @@ import com.example.cis3515_1.R
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
-
 
 @Composable
-fun Discussion(modifier: Modifier = androidx.compose.ui.Modifier, navController: NavHostController, selectedFilter: String, onClick:  suspend () -> Unit)
+fun StudentResources(navController: NavHostController, selectedFilter: String, onClick: suspend () -> Unit)
 {
-    val posts = remember { mutableStateOf<List<Post>>(emptyList()) }
+    val posts = remember { mutableStateOf<List<StudentResources>>(emptyList()) }
 
     LaunchedEffect(selectedFilter) {
-        Log.d("Discussion", "Before fetching posts for filter: $selectedFilter")
-        posts.value = fetchPostsFromFirestore(selectedFilter)
-        Log.d("Discussion", "After fetching posts, selected filter: $selectedFilter, posts count: ${posts.value.size}")
+        Log.d("StudentResources", "Before fetching posts for filter: $selectedFilter")
+        posts.value = fetchPostsFromFirestoreStudentResourcesCategory(selectedFilter)
+        Log.d("StudentResources", "After fetching posts, selected filter: $selectedFilter, posts count: ${posts.value.size}")
     }
 
     Scaffold(
@@ -72,20 +67,21 @@ fun Discussion(modifier: Modifier = androidx.compose.ui.Modifier, navController:
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            DiscussionList(posts = posts.value, navController)
+            StudentResourcesList(posts = posts.value, navController)
         }
     }
 }
 
 @Composable
-fun DiscussionList(posts: List<Post>, navController: NavHostController) {
+fun StudentResourcesList(posts: List<StudentResources>, navController: NavHostController)
+{
     LazyColumn {
         items(posts) { post ->
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
-                    .clickable { navController.navigate(Screen.PostDetail.createRoute(post.id)) }
+                    .clickable { navController.navigate(Screen.PostDetail_StudentResources.createRoute(post.id)) }
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -99,14 +95,6 @@ fun DiscussionList(posts: List<Post>, navController: NavHostController) {
                         verticalAlignment = Alignment.CenterVertically
                     )
                     {
-                        Column()
-                        {
-                            Text(
-                                text = "Posted on: ${post.date.formatToString()}",
-                                fontSize = 14.sp,
-                                color = Color.Gray
-                            )
-                        }
                         Column(modifier = Modifier.fillMaxWidth(),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.End)
@@ -153,37 +141,16 @@ fun DiscussionList(posts: List<Post>, navController: NavHostController) {
                                 .clip(RoundedCornerShape(6.dp))
                         )
                     }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Comment,
-                            contentDescription = "Comments",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "${post.commentNum}")
-                    }
                 }
             }
         }
     }
 }
 
-fun Date.formatToString(): String {
-    val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-    return formatter.format(this)
-}
-
-suspend fun fetchPostsFromFirestore(selectedFilter: String = "All"): List<Post> {
+suspend fun fetchPostsFromFirestoreStudentResourcesCategory(selectedFilter: String = "All"): List<StudentResources> {
     val firestore = FirebaseFirestore.getInstance()
-    var query: Query = firestore.collection("posts")
-    val posts = mutableListOf<Post>()
+    var query: Query = firestore.collection("studentResources")
+    val posts = mutableListOf<StudentResources>()
 
     if (selectedFilter != "All") {
         query = query.whereEqualTo("category", selectedFilter)
@@ -192,14 +159,13 @@ suspend fun fetchPostsFromFirestore(selectedFilter: String = "All"): List<Post> 
     try {
         val snapshot = query.orderBy("date", Query.Direction.DESCENDING).get().await()
         for (document in snapshot.documents) {
-            val post = Post(
+            val post = StudentResources(
                 id = document.id,
                 title = document.getString("title") ?: "",
                 content = document.getString("content") ?: "",
                 uid = document.getString("uid") ?: "",
                 userName = document.getString("userName") ?: "",
                 date = Date(document.getLong("date") ?: 0L),
-                commentNum = document.getLong("commentNum")?.toInt() ?: 0,
                 imageUrls = document.get("imageUrls") as List<String>? ?: emptyList(),
                 category = document.getString("category") ?: ""
             )

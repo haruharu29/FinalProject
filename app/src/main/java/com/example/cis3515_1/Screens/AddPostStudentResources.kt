@@ -49,7 +49,7 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddPostScreen(modifier: Modifier = Modifier, navController: NavController, onClick: suspend () -> Unit) {
+fun AddPostStudentResources(modifier: Modifier = Modifier, navController: NavController, onClick: suspend () -> Unit) {
     Scaffold(
         topBar = { DiscussionTopNavigationBar(
             navController = navController, onFilterSelected = {
@@ -65,9 +65,9 @@ fun AddPostScreen(modifier: Modifier = Modifier, navController: NavController, o
         ) {
             var title by rememberSaveable { mutableStateOf("") }
             var content by rememberSaveable { mutableStateOf("") }
-            var userName by rememberSaveable { mutableStateOf("") }
+            var userName by rememberSaveable { mutableStateOf("Temple University, Japan Campus") }
             var expanded by remember { mutableStateOf(false) }
-            val categories = listOf("Course Selection", "Events", "Clubs", "Other College Related", "Housing", "Living", "Others")
+            val categories = listOf("Discounts", "Events", "Clubs", "Housing", "Living", "Others")
             var selectedCategory by remember { mutableStateOf(categories.first()) }
             var imageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
@@ -169,7 +169,7 @@ fun AddPostScreen(modifier: Modifier = Modifier, navController: NavController, o
 
             Button(
                 onClick = {
-                    uploadPost(
+                    uploadPostStudentResources(
                         title = title,
                         content = content,
                         proposedUsername = userName,
@@ -188,7 +188,7 @@ fun AddPostScreen(modifier: Modifier = Modifier, navController: NavController, o
     }
 }
 
-fun uploadPost(
+fun uploadPostStudentResources(
     title: String,
     content: String,
     imageUris: List<Uri>,
@@ -203,7 +203,7 @@ fun uploadPost(
     CoroutineScope(Dispatchers.IO).launch {
         try {
             val imageUrls = imageUris.mapNotNull{ uri ->
-                val imageRef = storageRef.child("posts/${System.currentTimeMillis()}_${uri.lastPathSegment}")
+                val imageRef = storageRef.child("studentResources/${System.currentTimeMillis()}_${uri.lastPathSegment}")
                 val uploadTask = imageRef.putFile(uri).await()
                 imageRef.downloadUrl.await().toString()
             }
@@ -215,11 +215,10 @@ fun uploadPost(
                 "userName" to proposedUsername,
                 "date" to System.currentTimeMillis(),
                 "imageUrls" to imageUrls,
-                "category" to selectedCategory,
-                "commentNum" to 0
+                "category" to selectedCategory
             )
 
-            val documentReference = firestore.collection("posts").add(post).await()
+            val documentReference = firestore.collection("studentResources").add(post).await()
             val postId = documentReference.id
 
             if(proposedUsername.isNotEmpty()) {
@@ -227,7 +226,7 @@ fun uploadPost(
             }
 
             withContext(Dispatchers.Main) {
-                navController.navigate("Discussion/All")
+                navController.navigate("StudentResources/All")
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
@@ -236,3 +235,4 @@ fun uploadPost(
         }
     }
 }
+

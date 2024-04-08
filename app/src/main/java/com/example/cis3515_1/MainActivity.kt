@@ -39,7 +39,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cis3515_1.Navigation.NavBarBody
 import com.example.cis3515_1.Navigation.NavBarHeader
-import com.example.cis3515_1.Navigation.NavigationItem
+import Model.NavigationItem
 import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.Navigation.SetupNavGraph
 import com.example.cis3515_1.ui.theme.Cis3515_1Theme
@@ -56,6 +56,7 @@ class MainActivity : ComponentActivity() {
                 SetBarColor(color = MaterialTheme.colorScheme.background)
 
                 val navController = rememberNavController()
+                var selectedFilter by rememberSaveable { mutableStateOf("All") }
 
                 // Listen to the back stack to determine the current route
                 val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
@@ -78,7 +79,7 @@ class MainActivity : ComponentActivity() {
                     ),
                     NavigationItem(
                         title = "Academic Calendar",
-                        route = Screen.Club.route,
+                        route = Screen.AcademicCalendar.route,
                         selectedIcon = Icons.Filled.CalendarMonth,
                         unselectedIcon =  Icons.Outlined.CalendarMonth
                     ),
@@ -90,13 +91,13 @@ class MainActivity : ComponentActivity() {
                     ),
                     NavigationItem(
                         title = "Student Resources",
-                        route = Screen.Club.route,
+                        route = Screen.StudentResources.route,
                         selectedIcon = Icons.Filled.Accessibility,
                         unselectedIcon = Icons.Outlined.Accessibility
                     ),
                     NavigationItem(
                         title = "Lost and Found",
-                        route = Screen.LostAndFound_Staff.route,
+                        route = Screen.LostAndFound.route,
                         selectedIcon = ImageVector.vectorResource(id = R.drawable.lost_found),
                         unselectedIcon = ImageVector.vectorResource(id = R.drawable.lost_found)
                     ),
@@ -111,8 +112,6 @@ class MainActivity : ComponentActivity() {
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                 val scope = rememberCoroutineScope()
                 val context = LocalContext.current
-
-                var selectedFilter by rememberSaveable { mutableStateOf("All")}
 
                 ModalNavigationDrawer(
                     gesturesEnabled = drawerState.isOpen, drawerContent = {
@@ -155,19 +154,24 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         topBar = {
                             // Conditionally display the TopNavigationBar based on the current route
-                            if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.Discussion.route && currentRoute != Screen.AddPost.route&& currentRoute != Screen.PostDetail.route && currentRoute != Screen.DiscussionSearch.route) {
-                                TopNavigationBar (onClick = { drawerState.open() })
-                            }
 
-                            else if (currentRoute == Screen.Discussion.route && currentRoute == Screen.AddPost.route && currentRoute == Screen.PostDetail.route && currentRoute == Screen.DiscussionSearch.route) {
+                            if (currentRoute == Screen.Discussion.route || currentRoute == Screen.AddPost.route || currentRoute == Screen.PostDetail.route  || currentRoute == Screen.LostAndFound.route  || currentRoute == Screen.PostDetail_LostAndFound.route  || currentRoute == Screen.AddPostLostAndFound.route || currentRoute == Screen.AddPostStudentResources.route || currentRoute == Screen.StudentResources.route || currentRoute == Screen.PostDetail_StudentResources.route)
+                            {
                                 DiscussionTopNavigationBar(
                                     onFilterSelected = { filter -> selectedFilter = filter },
-                                    navController = navController, onClick = { drawerState.open() })
+                                    navController = navController, onClick = {drawerState.open()})
                             }
+
+                            else if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.Discussion.route && currentRoute != Screen.RegisterScreen.route && currentRoute != Screen.AddPostStudentResources.route && currentRoute != Screen.StudentResources.route && currentRoute != Screen.PostDetail_StudentResources.route && currentRoute != Screen.StudentResourcesSearch.route)
+                            {
+                                TopNavigationBar (onClick = { drawerState.open() })
+                                //DiscussionTopNavigationBar(navController = navController, onFilterSelected = {it})
+                            }
+
                         },
                         bottomBar = {
                             // Conditionally display the BottomNavigationBar based on the current route
-                            if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route) {
+                            if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.RegisterScreen.route) {
                                 BottomNavigationBar(navController)
                             }
 

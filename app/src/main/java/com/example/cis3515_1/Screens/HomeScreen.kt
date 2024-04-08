@@ -4,14 +4,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,10 +31,9 @@ import com.example.cis3515_1.TopNavigationBar
 import com.example.cis3515_1.ui.theme.Red01
 import com.example.cis3515_1.ui.theme.Red05
 
-@OptIn(ExperimentalMaterial3Api::class)
-//@Preview(showBackground = true)
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navController: NavHostController) {
+fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navController: NavHostController)
+{
     Column(horizontalAlignment = Alignment.CenterHorizontally)
     {
         Scaffold(
@@ -47,6 +47,10 @@ fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navCo
             {
                 LazyColumn(modifier = Modifier)
                 {
+                    item{
+                        Spacer(modifier = Modifier.size(10.dp))
+                    }
+
                     val gradient = Brush.verticalGradient(colors = listOf(Red05, Red01))
 
                     item {
@@ -69,6 +73,10 @@ fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navCo
                         }
                     }
 
+                    item{
+                        Spacer(modifier = Modifier.size(10.dp))
+                    }
+
                     item {
                         Row(Modifier.padding(start = 10.dp))
                         {
@@ -76,7 +84,7 @@ fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navCo
                                 modifier = Modifier
                                     .height(180.dp)
                                     .width(180.dp)
-                                    .padding(top =10.dp, end = 10.dp, bottom = 10.dp, start = 5.dp),
+                                    .padding(top = 10.dp, end = 10.dp, bottom = 10.dp, start = 5.dp),
                                 elevation = CardDefaults.cardElevation(10.dp),
                                 onClick = { navController.navigate(Screen.UpcomingEvent.route) }
                             )
@@ -90,7 +98,9 @@ fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navCo
                                 {
                                     Text(
                                         "UPCOMING EVENTS",
-                                        Modifier.padding(20.dp).align(Alignment.Center),
+                                        Modifier
+                                            .padding(20.dp)
+                                            .align(Alignment.Center),
                                         color = MaterialTheme.colorScheme.onPrimary,
                                         fontSize = 17.sp,
                                         fontWeight = FontWeight.Bold,
@@ -117,7 +127,9 @@ fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navCo
                                 {
                                     Text(
                                         "CLUBS & ORGANIZATIONS",
-                                        Modifier.padding(10.dp).align(Alignment.Center),
+                                        Modifier
+                                            .padding(10.dp)
+                                            .align(Alignment.Center),
                                         color = MaterialTheme.colorScheme.onPrimary,
                                         fontSize = 17.sp,
                                         fontWeight = FontWeight.Bold,
@@ -138,7 +150,7 @@ fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navCo
                                 modifier = Modifier
                                     .height(180.dp)
                                     .width(180.dp)
-                                    .padding(top =10.dp, end = 10.dp, bottom = 10.dp, start = 5.dp),
+                                    .padding(top = 10.dp, end = 10.dp, bottom = 10.dp, start = 5.dp),
                                 elevation = CardDefaults.cardElevation(10.dp),
                                 onClick = { navController.navigate(Screen.CourseSchedule.route) }
                             )
@@ -152,7 +164,9 @@ fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navCo
                                 {
                                     Text(
                                         "COURSE SCHEDULES",
-                                        Modifier.padding(20.dp).align(Alignment.Center),
+                                        Modifier
+                                            .padding(20.dp)
+                                            .align(Alignment.Center),
                                         color = MaterialTheme.colorScheme.onPrimary,
                                         letterSpacing = 0.sp,
                                         fontSize = 17.sp,
@@ -166,9 +180,9 @@ fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navCo
                                 modifier = Modifier
                                     .height(180.dp)
                                     .width(180.dp)
-                                    .padding(top =10.dp, bottom = 10.dp, start = 10.dp),
+                                    .padding(top = 10.dp, bottom = 10.dp, start = 10.dp),
                                 elevation = CardDefaults.cardElevation(10.dp),
-                                onClick = { navController.navigate(Screen.Discussion.route) }
+                                onClick = {  navController.navigate(Screen.Discussion.createRoute("All"))}
                             )
                             {
                                 Box(
@@ -180,14 +194,15 @@ fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navCo
                                 {
                                     Text(
                                         "DISCUSSIONS",
-                                        Modifier.padding(10.dp).align(Alignment.Center),
+                                        Modifier
+                                            .padding(10.dp)
+                                            .align(Alignment.Center),
                                         color = MaterialTheme.colorScheme.onPrimary,
                                         fontSize = 17.sp,
                                         fontWeight = FontWeight.Bold,
                                         textAlign = TextAlign.Center
                                     )
                                 }
-
                             }
                         }
                     }

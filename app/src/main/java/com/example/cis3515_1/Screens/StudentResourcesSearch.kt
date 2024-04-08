@@ -1,6 +1,6 @@
 package com.example.cis3515_1.Screens
 
-import Model.Post
+import Model.StudentResources
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
@@ -37,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,13 +55,13 @@ import kotlinx.coroutines.tasks.await
 import java.util.Date
 
 @Composable
-fun DiscussionSearch(navController: NavController, onClick: suspend () -> Unit) {
+fun StudentResourcesSearch(navController: NavController, onClick: suspend () -> Unit) {
     var searchText by remember { mutableStateOf("") }
-    var searchResults by remember(searchText) { mutableStateOf<List<Post>>(emptyList()) }
+    var searchResults by remember(searchText) { mutableStateOf<List<StudentResources>>(emptyList()) }
 
     LaunchedEffect(searchText) {
         if (searchText.isNotEmpty()) {
-            searchResults = fetchPostsFromFirestore(searchQuery = searchText)
+            searchResults = fetchPostsFromFirestore_withCategory(searchQuery = searchText)
         } else {
             searchResults = emptyList()
         }
@@ -81,7 +79,7 @@ fun DiscussionSearch(navController: NavController, onClick: suspend () -> Unit) 
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            SearchBox(onSearch = {
+            SearchBox_studentResource(onSearch = {
                 searchText = it
             })
             SearchResultList(posts = searchResults, navController = navController)
@@ -90,7 +88,7 @@ fun DiscussionSearch(navController: NavController, onClick: suspend () -> Unit) 
 }
 
 @Composable
-fun SearchBox(onSearch: (String) -> Unit = {}) {
+fun SearchBox_studentResource(onSearch: (String) -> Unit = {}) {
     val searchText = remember { mutableStateOf("") }
 
     OutlinedTextField(
@@ -124,7 +122,7 @@ fun SearchBox(onSearch: (String) -> Unit = {}) {
     )
 }
 @Composable
-fun SearchResultList(posts: List<Post>, navController: NavController) {
+fun SearchResultList(posts: List<StudentResources>, navController: NavController) {
     LazyColumn {
         items(posts) { post ->
             PostCard(post = post, navController = navController)
@@ -133,13 +131,13 @@ fun SearchResultList(posts: List<Post>, navController: NavController) {
 }
 
 @Composable
-fun PostCard(post: Post, navController: NavController) {
+fun PostCard(post: StudentResources, navController: NavController) {
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { navController.navigate(Screen.PostDetail.createRoute(post.id)) }
+            .clickable { navController.navigate(Screen.PostDetail_StudentResources.createRoute(post.id)) }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -153,14 +151,6 @@ fun PostCard(post: Post, navController: NavController) {
                 verticalAlignment = Alignment.CenterVertically
             )
             {
-                Column()
-                {
-                    Text(
-                        text = "Posted on: ${post.date.formatToString()}",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                }
                 Column(modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.End)
@@ -207,50 +197,33 @@ fun PostCard(post: Post, navController: NavController) {
                         .clip(RoundedCornerShape(6.dp))
                 )
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Comment,
-                    contentDescription = "Comments",
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "${post.commentNum}")
-            }
-
         }
     }
 }
 
-suspend fun fetchPostsFromFirestore(selectedFilter: String = "All", searchQuery: String = ""): List<Post> {
+suspend fun fetchPostsFromFirestore_withCategory(selectedFilter: String = "All", searchQuery: String = ""): List<StudentResources>
+{
     val firestore = FirebaseFirestore.getInstance()
-    var query: Query = firestore.collection("posts")
+    var query: Query = firestore.collection("studentResources")
 
     if (selectedFilter != "All") {
         query = query.whereEqualTo("category", selectedFilter)
     }
 
-    val posts = mutableListOf<Post>()
+    val posts = mutableListOf<StudentResources>()
     try {
-        val snapshot = query.orderBy("date", Query.Direction.DESCENDING).get().await()
+        val snapshot = query.orderBy("category", Query.Direction.DESCENDING).get().await()
         for (document in snapshot.documents) {
             val title = document.getString("title") ?: ""
             val content = document.getString("content") ?: ""
             if (searchQuery.isEmpty() || title.contains(searchQuery, ignoreCase = true) || content.contains(searchQuery, ignoreCase = true)) {
-                val post = Post(
+                val post = StudentResources(
                     id = document.id,
                     title = title,
                     content = content,
                     uid = document.getString("uid") ?: "",
                     userName = document.getString("userName") ?: "",
                     date = Date(document.getLong("date") ?: 0L),
-                    commentNum = document.getLong("commentNum")?.toInt() ?: 0,
                     imageUrls = document.get("imageUrls") as List<String>? ?: emptyList(),
                     category = document.getString("category") ?: ""
                 )

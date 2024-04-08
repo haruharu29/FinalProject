@@ -24,6 +24,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.R
+import com.example.cis3515_1.ui.theme.Red01
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
@@ -56,12 +57,12 @@ fun LogIn(userEmail: FirebaseUser?, onLogout: () -> Unit, navController: NavHost
                 {
                     TextButton(onClick = {navController.navigate(Screen.Home.route)}, modifier = Modifier.padding(8.dp))
                     {
-                        Text("Just kidding!")
+                        Text("Just kidding!", color = Red01)
                     }
 
                     TextButton(onClick = { onLogout() }, modifier = Modifier.padding(8.dp))
                     {
-                        Text("Log Out")
+                        Text("Log Out", color = Red01)
                     }
                 }
             }

@@ -1,11 +1,12 @@
 package com.example.cis3515_1
 
+import Model.BottomNavigation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -16,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.cis3515_1.Navigation.Screen
-import com.example.cis3515_1.data.BottomNavigation
 
 val items = listOf(
     BottomNavigation(
@@ -43,14 +43,15 @@ fun BottomNavigationBar(navController: NavController)
 {
     NavigationBar {
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-        Row (modifier = Modifier.background(MaterialTheme.colorScheme.inverseOnSurface)){
+        Row (modifier = Modifier.background(MaterialTheme.colorScheme.onTertiary)){
             items.forEach { item ->
                 val isSelected = item.route == currentRoute
                 NavigationBarItem(
                     selected = isSelected,
                     onClick = {
                         if (!isSelected) {
-                            navController.navigate(item.route) {
+                            navController.navigate(item.route)
+                            {
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -66,8 +67,7 @@ fun BottomNavigationBar(navController: NavController)
 
                     label =
                     {
-                        Text(text = item.title,
-                            color = MaterialTheme.colorScheme.onBackground)
+                        Text(text = item.title, color = MaterialTheme.colorScheme.onBackground)
                     }
                 )
             }

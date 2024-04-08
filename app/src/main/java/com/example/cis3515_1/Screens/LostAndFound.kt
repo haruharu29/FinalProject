@@ -1,7 +1,6 @@
 package com.example.cis3515_1.Screens
 
-import Model.Post
-import android.util.Log
+import Model.LostAndFound
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -26,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,16 +43,19 @@ import com.example.cis3515_1.BottomNavigationBar
 import com.example.cis3515_1.DiscussionTopNavigationBar
 import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.R
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import kotlinx.coroutines.tasks.await
+import java.util.Date
 
 @Composable
-fun LostAndFoundStaff(modifier: Modifier = androidx.compose.ui.Modifier, navController: NavHostController, selectedFilter: String, onClick: suspend () -> Unit)
+fun LostAndFoundStaff(navController: NavHostController, onClick: suspend () -> Unit)
 {
-    val posts = remember { mutableStateOf<List<Post>>(emptyList()) }
+    val posts = remember { mutableStateOf<List<LostAndFound>>(emptyList()) }
 
-    LaunchedEffect(selectedFilter) {
-        Log.d("Lost & Found", "Before fetching posts for filter: $selectedFilter")
-        posts.value = fetchPostsFromFirestore(selectedFilter)
-        Log.d("Lost & Found", "After fetching posts, selected filter: $selectedFilter, posts count: ${posts.value.size}")
+    LaunchedEffect(posts)
+    {
+        posts.value = fetchPostsFromFirestore_Lost(posts)
     }
 
     Scaffold(
@@ -75,14 +77,14 @@ fun LostAndFoundStaff(modifier: Modifier = androidx.compose.ui.Modifier, navCont
 }
 
 @Composable
-fun LostAndFoundList(posts: List<Post>, navController: NavHostController) {
+fun LostAndFoundList(posts: List<LostAndFound>, navController: NavHostController) {
     LazyColumn {
         items(posts) { post ->
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
-                    .clickable { navController.navigate(Screen.PostDetail.createRoute(post.id)) }
+                    .clickable { navController.navigate(Screen.PostDetail_LostAndFound.createRoute(post.id)) }
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -104,9 +106,11 @@ fun LostAndFoundList(posts: List<Post>, navController: NavHostController) {
                                 color = Color.Gray
                             )
                         }
-                        Column(modifier = Modifier.fillMaxWidth(),
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
                             verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.End)
+                            horizontalAlignment = Alignment.End
+                        )
                         {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -120,11 +124,11 @@ fun LostAndFoundList(posts: List<Post>, navController: NavHostController) {
                                     modifier = Modifier.size(16.dp),
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text(
+                                /*Text(
                                     text = post.category,
 //                                    TODO:adjust the fontsize
                                     fontSize = 12.sp
-                                )
+                                )*/
                             }
                         }
 
@@ -150,26 +154,33 @@ fun LostAndFoundList(posts: List<Post>, navController: NavHostController) {
                                 .clip(RoundedCornerShape(6.dp))
                         )
                     }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Comment,
-                            contentDescription = "Comments",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "${post.commentNum}")
-                    }
-
-
                 }
             }
         }
     }
+}
+suspend fun fetchPostsFromFirestore_Lost(posts: MutableState<List<LostAndFound>>): List<LostAndFound> {
+    val firestore = FirebaseFirestore.getInstance()
+    var query: Query = firestore.collection("lost")
+    val posts = mutableListOf<LostAndFound>()
+
+    try {
+        val snapshot = query.orderBy("date", Query.Direction.DESCENDING).get().await()
+        for (document in snapshot.documents) {
+            val post = LostAndFound(
+                id = document.id,
+                title = document.getString("title") ?: "",
+                content = document.getString("content") ?: "",
+                uid = document.getString("uid") ?: "",
+                userName = document.getString("username") ?: "",
+                date = Date(document.getLong("date") ?: 0L),
+                imageUrls = document.get("imageUrls") as List<String>? ?: emptyList(),
+            )
+            posts.add(post)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+
+    return posts
 }

@@ -17,10 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.cis3515_1.DiscussionTopNavigationBar
-import com.example.cis3515_1.getOrSetUsernameForPost
 import com.example.cis3515_1.ui.theme.Red01
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -49,7 +45,7 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddPostScreen(modifier: Modifier = Modifier, navController: NavController, onClick: suspend () -> Unit) {
+fun AddPostLostAndFoundScreen(modifier: Modifier = Modifier, navController: NavController, onClick: suspend () -> Unit) {
     Scaffold(
         topBar = { DiscussionTopNavigationBar(
             navController = navController, onFilterSelected = {
@@ -65,10 +61,6 @@ fun AddPostScreen(modifier: Modifier = Modifier, navController: NavController, o
         ) {
             var title by rememberSaveable { mutableStateOf("") }
             var content by rememberSaveable { mutableStateOf("") }
-            var userName by rememberSaveable { mutableStateOf("") }
-            var expanded by remember { mutableStateOf(false) }
-            val categories = listOf("Course Selection", "Events", "Clubs", "Other College Related", "Housing", "Living", "Others")
-            var selectedCategory by remember { mutableStateOf(categories.first()) }
             var imageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
             val pickImagesLauncher = rememberLauncherForActivityResult(
@@ -85,6 +77,17 @@ fun AddPostScreen(modifier: Modifier = Modifier, navController: NavController, o
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = content,
+                onValueChange = { content = it },
+                label = { Text("Content") },
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -97,56 +100,6 @@ fun AddPostScreen(modifier: Modifier = Modifier, navController: NavController, o
                     .fillMaxWidth()
                     .height(150.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = userName,
-                onValueChange = { userName = it },
-                label = { Text("Username") },
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = {
-                    expanded = !expanded
-                }
-            ) {
-                OutlinedTextField(
-                    readOnly = true,
-                    value = selectedCategory,
-                    onValueChange = { },
-                    label = { Text("Category") },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth(),
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(
-                            expanded = expanded
-                        )
-                    }
-                )
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = {
-                        expanded = false
-                    }
-                ) {
-                    categories.forEach { selectionOption ->
-                        DropdownMenuItem(
-                            text = { Text(text = selectionOption) },
-                            onClick = {
-                                selectedCategory = selectionOption
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -169,12 +122,11 @@ fun AddPostScreen(modifier: Modifier = Modifier, navController: NavController, o
 
             Button(
                 onClick = {
-                    uploadPost(
+                    uploadPostLost(
                         title = title,
                         content = content,
-                        proposedUsername = userName,
+                        proposedUsername = /*userName*/"Temple University Japan Campus",
                         imageUris = imageUris,
-                        selectedCategory = selectedCategory,
                         navController = navController
                     )
                 },
@@ -188,11 +140,10 @@ fun AddPostScreen(modifier: Modifier = Modifier, navController: NavController, o
     }
 }
 
-fun uploadPost(
+fun uploadPostLost(
     title: String,
     content: String,
     imageUris: List<Uri>,
-    selectedCategory: String,
     navController: NavController,
     proposedUsername: String
 ) {
@@ -202,8 +153,8 @@ fun uploadPost(
 
     CoroutineScope(Dispatchers.IO).launch {
         try {
-            val imageUrls = imageUris.mapNotNull{ uri ->
-                val imageRef = storageRef.child("posts/${System.currentTimeMillis()}_${uri.lastPathSegment}")
+            val imageUrls = imageUris.mapNotNull { uri ->
+                val imageRef = storageRef.child("lost/${System.currentTimeMillis()}_${uri.lastPathSegment}")
                 val uploadTask = imageRef.putFile(uri).await()
                 imageRef.downloadUrl.await().toString()
             }
@@ -214,23 +165,25 @@ fun uploadPost(
                 "uid" to userEmail,
                 "userName" to proposedUsername,
                 "date" to System.currentTimeMillis(),
-                "imageUrls" to imageUrls,
-                "category" to selectedCategory,
-                "commentNum" to 0
+                "imageUrls" to imageUrls
             )
 
-            val documentReference = firestore.collection("posts").add(post).await()
+            val documentReference = firestore.collection("lost").add(post).await()
             val postId = documentReference.id
 
             if(proposedUsername.isNotEmpty()) {
-                getOrSetUsernameForPost(postId, userEmail, proposedUsername)
+                getOrSetUsernameForPost_l(postId, userEmail, proposedUsername)
             }
 
             withContext(Dispatchers.Main) {
-                navController.navigate("Discussion/All")
+                navController.navigate("LostAndFound")
             }
-        } catch (e: Exception) {
-            withContext(Dispatchers.Main) {
+        }
+
+        catch (e: Exception)
+        {
+            withContext(Dispatchers.Main)
+            {
                 navController.navigate("HomeScreen")
             }
         }

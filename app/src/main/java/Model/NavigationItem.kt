@@ -1,4 +1,4 @@
-package com.example.cis3515_1.Navigation
+package Model
 
 import androidx.compose.ui.graphics.vector.ImageVector
 
