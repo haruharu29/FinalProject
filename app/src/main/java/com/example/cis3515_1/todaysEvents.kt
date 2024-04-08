@@ -1,5 +1,6 @@
 package com.example.cis3515_1
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
@@ -26,81 +29,43 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.compose.ImagePainter
 import com.example.cis3515_1.Navigation.Screen
+import com.google.firebase.installations.time.SystemClock
 import model.upcomingEventsVars
 
+
+
+/*
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun todaysEvents(upcomingEvents: List<upcomingEventsVars>,  navController: NavController)
 {
-    LazyColumn {
+    val todaysDate: String = SystemClock.getInstance().toString()
+    val pagerState = rememberPagerState(pageCount = {10 })
+
+
         items(upcomingEvents) { uEvent ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .clickable { navController.navigate(Screen.PostDetail.createRoute(uEvent.nameOfEvent)) }
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+            if(uEvent.date.equals(todaysDate))
+            {
+                HorizontalPager(state = pagerState) { uEvent ->
+
                     Text(
-                        text = uEvent.nameOfEvent,
-                        maxLines = 2,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp,
-                        lineHeight = 26.sp
+                        text = "event name: $uEvent.nameOfEvent",
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    )
-                    {
-                        Column()
-                        {
-                            Text(
-                                text = "Event: ${uEvent.nameOfEvent}",
-                                fontSize = 20.sp,
-                                color = Color.Black
-                            )
-                            Text(
-                                text = "Date: ${uEvent.date}",
-                                fontSize = 20.sp,
-                                color = Color.Black
-                            )
-                            Text(
-                                text = "Location: ${uEvent.location}",
-                                fontSize = 20.sp,
-                                color = Color.Black
-                            )
-                            Text(
-                                text = "Description: ${uEvent.description}",
-                                fontSize = 20.sp,
-                                color = Color.Black
-                            )
-                        }
-                    }
 
+                    Text(
+                        text = "location: $uEvent.location ",
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(
+                        text = "date: $uEvent.date ",
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    ImagePainter()
                 }
-                Text(
-                    text = uEvent.nameOfEvent,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                    fontSize = 16.sp
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                uEvent.imageUrls.firstOrNull()?.let { imageUrl ->
-                    AsyncImage(
-                        model = imageUrl,
-                        placeholder = painterResource(id = R.drawable.tuj_logo),
-                        error = painterResource(id = R.drawable.tuj_logo),
-                        contentDescription = "Post image",
-                        contentScale = ContentScale.Crop,
-                        modifier =   Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 200.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                    )
-                }
-
             }
-        }
+
     }
-}
+}*/
