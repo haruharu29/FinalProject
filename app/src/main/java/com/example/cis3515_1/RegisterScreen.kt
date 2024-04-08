@@ -59,7 +59,6 @@ import com.google.firebase.auth.auth
 @Composable
 fun RegisterScreen(modifier: Modifier = Modifier, navController: NavHostController)
 {
-    val user = Firebase.auth.currentUser
     var confirmPassword by remember { mutableStateOf("") }
     var userEmail by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -139,13 +138,13 @@ fun RegisterScreen(modifier: Modifier = Modifier, navController: NavHostControll
                 Button(onClick = {
                     if (!userEmail.endsWith("@temple.edu")) {
                         errorMessage = "Please use a @temple.edu email address"
-                    } else if (password != confirmPassword) {
+                    } else
+                        if (password != confirmPassword) {
                         errorMessage = "Passwords do not match"
                     } else {
-                        registerUser(userEmail, password) { success, message ->
+                        registerUser(userEmail, password, navController) { success, message ->
                             if (success) {
-                                errorMessage = ""
-                                navController.navigate(Screen.Account.route)
+                                errorMessage = "Registration successful. Please check your email to verify your account before logging in."
                             } else {
                                 errorMessage = message
                             }
@@ -187,3 +186,24 @@ fun RegisterScreen(modifier: Modifier = Modifier, navController: NavHostControll
 //        }
 //    }
 //}
+
+fun registerUser(email: String, password: String, navController: NavHostController, onResult: (Boolean, String) -> Unit) {
+    val auth = Firebase.auth
+    auth.createUserWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if(task.isSuccessful) {
+                val user = auth.currentUser
+                user?.sendEmailVerification()?.addOnCompleteListener { verificationTask ->
+                    if (verificationTask.isSuccessful) {
+                        onResult(true, "Registered successfully. Please check your email to verify your account.")
+                    } else {
+                        user.delete()
+                        onResult(false, verificationTask.exception?.message ?: "Failed to send verification email. Please try registering again.")
+                    }
+                }
+            } else {
+                onResult(false, task.exception?.message ?: "Registration failed")
+            }
+        }
+}
+

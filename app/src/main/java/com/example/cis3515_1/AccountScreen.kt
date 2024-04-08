@@ -67,6 +67,7 @@ fun AccountScreen(modifier: Modifier = Modifier, navController: NavHostControlle
         modifier = modifier.fillMaxSize()
     )
     { paddingValues ->
+//        if(user != null && user.isEmailVerified)
         if(user != null)
         {
             LoggedInScreen(userEmail, onLogout =
@@ -121,32 +122,23 @@ fun AccountScreen(modifier: Modifier = Modifier, navController: NavHostControlle
                     Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
                     Spacer(modifier = Modifier.height(8.dp))
                 }
-                Button(onClick =
-                {
-                    if(userEmail.endsWith("@temple.edu"))
-                    {
-                        loginUser(userEmail, password)
-                        { success, message ->
-                            if(success)
-                            {
-                                errorMessage = ""
-                                navController.navigate(Screen.Account.route)
-                                userEmail = userEmail
-                            }
-                            else
-                            {
-                                errorMessage = message
+                Button(onClick = {
+                    if (userEmail.endsWith("@temple.edu")) {
+                        loginUser(userEmail, password, navController) { success, message ->
+                            errorMessage = message
+                            if (success) {
+                                userEmail = ""
+                                password = ""
                             }
                         }
-                    }
-                    else
-                    {
+                    } else {
                         errorMessage = "Please use a @temple.edu email address"
                     }
                 })
                 {
                     Text("Login")
                 }
+
 
                 TextButton(onClick =
                 {
@@ -169,35 +161,29 @@ fun PreviewAccountScreen()
     AccountScreen(modifier = Modifier, navController = rememberNavController())
 }
 
-fun registerUser(email: String, password: String, onResult: (Boolean, String) -> Unit) {
-    val auth = Firebase.auth
-    auth.createUserWithEmailAndPassword(email, password)
-        .addOnCompleteListener { task ->
-            if(task.isSuccessful)
-            {
-                onResult(true, "Registration successful")
-            }
-            else
-            {
-                onResult(false, task.exception?.message ?: "Registration failed")
-            }
-        }
-}
-
-fun loginUser(email: String, password: String, onResult: (Boolean, String) -> Unit) {
+fun loginUser(email: String, password: String, navController: NavHostController, onResult: (Boolean, String) -> Unit) {
     val auth = Firebase.auth
     auth.signInWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
-            if(task.isSuccessful)
-            {
-                onResult(true, "Login successful")
-            }
-            else
-            {
+            if (task.isSuccessful) {
+                val user = auth.currentUser
+                if (user != null)
+//                if (user != null && user.isEmailVerified)
+                {
+                    onResult(true, "Login successful")
+                    navController.navigate(Screen.Account.route) {
+                        popUpTo(Screen.Account.route) { inclusive = true }
+                    }
+                } else {
+                    auth.signOut()
+                    onResult(false, "Please verify your email address before logging in.")
+                }
+            } else {
                 onResult(false, task.exception?.message ?: "Login failed")
             }
         }
 }
+
 
 @Composable
 fun LoggedInScreen(userEmail: String, onLogout: () -> Unit) {
