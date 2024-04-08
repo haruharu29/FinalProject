@@ -2,11 +2,10 @@ package com.example.cis3515_1.Navigation
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.modifier.modifierLocalConsumer
 
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
+import androidx.navigation.Navigation
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
@@ -21,9 +20,6 @@ import com.example.cis3515_1.Notifications
 import com.example.cis3515_1.PostDetailScreen
 import com.example.cis3515_1.RegisterScreen
 import com.example.cis3515_1.UpcomingEvent
-import com.example.cis3515_1.addEventScreen
-import com.example.cis3515_1.eventsDetailsScreen
-import com.example.cis3515_1.eventsSearch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +40,10 @@ fun SetupNavGraph(navController: NavHostController) {
             Clubs(navController = navController)
         }
 
+        composable(route = Screen.UpcomingEvent.route)
+        {
+            UpcomingEvent()
+        }
         composable(route = Screen.Notifications.route)
         {
             Notifications(navController = navController)
@@ -84,25 +84,6 @@ fun SetupNavGraph(navController: NavHostController) {
             RegisterScreen(navController = navController)
         }
 
-        composable(route = Screen.UpcomingEvent.route)
-        {
-            UpcomingEvent(navController = navController)
-        }
-
-        composable(route = Screen.addEvent.route)
-        {
-            addEventScreen( navController = navController)
-        }
-
-        composable(route = Screen.eventsSearch.route)
-        {
-            eventsSearch(navController = navController)
-        }
-
-        composable(route = Screen.eventsDetailsScreen.route, arguments = listOf(navArgument("eventId") { type = NavType.StringType }))
-        { backStackEntry ->
-            eventsDetailsScreen(eventId = backStackEntry.arguments?.getString("eventId") ?: "", navController = navController)
-        }
 
     }
 }

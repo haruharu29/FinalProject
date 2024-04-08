@@ -46,12 +46,7 @@ class MainActivity : ComponentActivity() {
                                 onFilterSelected = { filter -> selectedFilter = filter },
                                 navController = navController)
                         }
-
-                        else if (currentRoute == Screen.UpcomingEvent.route || currentRoute == Screen.addEvent.route ||currentRoute == Screen.eventsSearch.route) {
-                            EventsTopNavigationBar(
-                                navController = navController)
-                        }
-                        else if (currentRoute != Screen.Splash.route && currentRoute!= Screen.UpcomingEvent.route) {
+                        else if (currentRoute != Screen.Splash.route) {
                             TopNavigationBar()
                         }
                     },
@@ -64,8 +59,6 @@ class MainActivity : ComponentActivity() {
                 ) {
                     SetupNavGraph(navController = navController)
                 }
-
-
             }
         }
     }

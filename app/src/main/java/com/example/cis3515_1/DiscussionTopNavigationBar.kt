@@ -52,8 +52,8 @@ fun DiscussionTopNavigationBar(modifier: Modifier = Modifier, navController: Nav
                                onFilterSelected: (String) -> Unit,)
 {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    TopAppBar(colors = TopAppBarDefaults.topAppBarColors(),
-
+        TopAppBar(colors = TopAppBarDefaults.topAppBarColors(),
+            // top bar title
             title = {
                 if(currentRoute == Screen.Discussion.route) {
                     Text(
@@ -73,9 +73,8 @@ fun DiscussionTopNavigationBar(modifier: Modifier = Modifier, navController: Nav
                         fontWeight = FontWeight.Bold
                     )
                 }
-
             },
-
+            // icon on top left
             navigationIcon = {
                 if (currentRoute == Screen.Discussion.route) {
                     IconButton(onClick = { onDiscussionNavigationIconClicked() }) {
@@ -87,7 +86,7 @@ fun DiscussionTopNavigationBar(modifier: Modifier = Modifier, navController: Nav
                     }
                 }
             },
-
+            // icons on top right
             actions = {
                 val showFilterMenu = remember { mutableStateOf(false) }
                 if(currentRoute == Screen.Discussion.route) {
@@ -147,10 +146,6 @@ fun DiscussionTopNavigationBar(modifier: Modifier = Modifier, navController: Nav
                     IconButton(onClick = { onAddPostClicked(navController) }) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = "Add Post")
                     }
-
-
-
-
                 }
             },
 
@@ -168,4 +163,3 @@ fun onAddPostClicked(navController: NavController)
 {
     navController.navigate("AddPost")
 }
-
