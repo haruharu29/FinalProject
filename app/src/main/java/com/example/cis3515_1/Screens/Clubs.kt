@@ -10,6 +10,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -116,12 +117,6 @@ fun ClubsCard(club: Club, modifier: Modifier = Modifier, navController: NavHostC
     val rotationState by animateFloatAsState(
         targetValue = if (expandedState) 180f else 0f
     )
-    val onLongPress: () -> Unit = {
-        Log.d("ClubsCard", "Long press detected")
-        if (currentUserId.endsWith("@tuj.temple.edu")) {
-            showDialog = true
-        }
-    }
 
     if (showDialog) {
         AlertDialog(
@@ -155,20 +150,10 @@ fun ClubsCard(club: Club, modifier: Modifier = Modifier, navController: NavHostC
                 easing = LinearOutSlowInEasing
             )
         )
-        .clickable { expandedState = !expandedState }
-        .pointerInput(club.id) {
-            detectTapGestures(
-                onLongPress = {
-                    onLongPress()
-                }
-            )
-        },
+        .clickable { expandedState = !expandedState },
         shape = CardDefaults.elevatedShape,
         colors = CardDefaults.cardColors(containerColor = Color.Transparent, disabledContainerColor = Grey, contentColor = Red01),
-//        onClick = { if (!currentUserId.endsWith("@tuj.temple.edu")) {
-//            expandedState = !expandedState
-//        }
-//        }
+        onClick = { expandedState = !expandedState }
         )
     {
         Column(modifier = Modifier
@@ -222,7 +207,7 @@ fun ClubsCard(club: Club, modifier: Modifier = Modifier, navController: NavHostC
                 Spacer(modifier.size(20.dp))
 
                 Text(
-                    text ="Leaders:\n${club.leader1} (${club.leader1Email})\n${club.leader2} (${club.leader1Email})",
+                    text ="Leaders:\n${club.leader1} (${club.leader1Email})\n${club.leader2} (${club.leader2Email})",
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.W900,
                     style = MaterialTheme.typography.bodyMedium
@@ -238,6 +223,20 @@ fun ClubsCard(club: Club, modifier: Modifier = Modifier, navController: NavHostC
                     fontWeight = FontWeight.W900,
                     fontStyle = FontStyle.Italic
                 )
+
+                if (currentUserId.endsWith("@tuj.temple.edu")) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Button(
+                            onClick = { showDialog = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = Red01)
+                        ) {
+                            Text("Delete")
+                        }
+                    }
+                }
             }
         }
     }
