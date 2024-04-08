@@ -11,6 +11,5 @@ data class Notification(
     val type: String = "", // "postReply" or "commentReply"
     val contentPreview: String = "",
     var date: Date = Date(),
-    val read: Boolean = false,
-    val exists: Boolean = true
+    val read: Boolean = false
 )
