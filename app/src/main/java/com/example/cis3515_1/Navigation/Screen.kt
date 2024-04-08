@@ -16,12 +16,21 @@ sealed class Screen(val route: String)
     object Account: Screen("Account")
     object Notifications: Screen("Notifications")
     object AddPost: Screen("AddPost")
+    object addEvent : Screen("addEvent")
 
     object PostDetail : Screen("postDetail/{postId}")
     {
         fun createRoute(postId: String) = "postDetail/$postId"
     }
 
+    object eventsDetailsScreen : Screen("eventsDetails/{eventId}")
+    {
+        fun createRoute(eventId: String) = "eventsDetails/$eventId"
+    }
+
+
+
     object DiscussionSearch: Screen("DiscussionSearch")
+    object eventsSearch: Screen("eventsSearch")
     object RegisterScreen: Screen("RegisterScreen")
 }
