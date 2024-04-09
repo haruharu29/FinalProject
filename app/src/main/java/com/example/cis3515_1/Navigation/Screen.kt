@@ -5,8 +5,17 @@ sealed class Screen(val route: String)
     object Splash : Screen("splash_screen")
     object LoggedIn: Screen("Logged In")
     object Home : Screen("home_screen")
-    object Club: Screen("club_screen")
+    object Club: Screen("Club")
+    object AddClub: Screen("AddClub")
     object UpcomingEvent: Screen("UpcomingEvent")
+    object todaysEvents: Screen("todaysEvents")
+    object addEvent: Screen("addEvent")
+    object eventsDetailsScreen : Screen("eventsDetailsScreen/{eventId}")
+    {
+        fun createRoute(eventId: String) = "eventsDetailsScreen/$eventId"
+    }
+    object eventsSearch: Screen("eventsSearch")
+
     object LogIn: Screen("LogIn")
     object RegisterScreen: Screen("RegisterScreen")
     object CourseSchedule:  Screen("Course Schedule")

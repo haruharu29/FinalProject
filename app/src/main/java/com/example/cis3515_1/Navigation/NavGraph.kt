@@ -45,10 +45,13 @@ import com.example.cis3515_1.Screens.PostDetailScreen_LostAndFound
 import com.example.cis3515_1.Screens.PostDetailScreen_StudentResources
 import com.example.cis3515_1.Screens.StudentResources
 import com.example.cis3515_1.Screens.StudentResourcesSearch
-import com.example.cis3515_1.Screens.UpcomingEvent
+import com.example.cis3515_1.Screens.addEventScreen
+import com.example.cis3515_1.Screens.eventsSearch
 import com.example.cis3515_1.TopNavigationBar
+import com.example.cis3515_1.UpcomingEvent
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.example.cis3515_1.Screens.eventsDetailsScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,7 +106,19 @@ fun SetupNavGraph(onClick: suspend () -> Unit, navController: NavHostController)
 
         composable(route = Screen.UpcomingEvent.route)
         {
-            UpcomingEvent(onClick = onClick, navController = navController)
+            UpcomingEvent(navController = navController)
+        }
+        composable(route = Screen.addEvent.route)
+        {
+            addEventScreen( navController = navController)
+        }
+        composable(route = Screen.eventsSearch.route)
+        {
+            eventsSearch(navController = navController)
+        }
+        composable(route = Screen.eventsDetailsScreen.route, arguments = listOf(navArgument("eventId") { type = NavType.StringType }))
+        { backStackEntry ->
+            eventsDetailsScreen(eventId = backStackEntry.arguments?.getString("eventId") ?: "", navController = navController)
         }
 
         composable(route = Screen.CourseSchedule.route)

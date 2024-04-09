@@ -1,0 +1,11 @@
+package Model
+
+data class upcomingEventsVars(
+    val id: String,
+    val nameOfEvent: String,
+    val description: String,
+    val location: String,
+    val date: String,
+    var imageUrls: List<String> = emptyList()
+
+)

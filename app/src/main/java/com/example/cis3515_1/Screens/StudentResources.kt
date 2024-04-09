@@ -42,10 +42,6 @@ import com.example.cis3515_1.BottomNavigationBar
 import com.example.cis3515_1.DiscussionTopNavigationBar
 import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.R
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import kotlinx.coroutines.tasks.await
-import java.util.Date
 
 @Composable
 fun StudentResources(navController: NavHostController, selectedFilter: String, onClick: suspend () -> Unit)
@@ -54,7 +50,7 @@ fun StudentResources(navController: NavHostController, selectedFilter: String, o
 
     LaunchedEffect(selectedFilter) {
         Log.d("StudentResources", "Before fetching posts for filter: $selectedFilter")
-        posts.value = fetchPostsFromFirestoreStudentResourcesCategory(selectedFilter)
+        posts.value = fetchPostsFromFirestore_withCategory(selectedFilter)
         Log.d("StudentResources", "After fetching posts, selected filter: $selectedFilter, posts count: ${posts.value.size}")
     }
 
@@ -145,35 +141,4 @@ fun StudentResourcesList(posts: List<StudentResources>, navController: NavHostCo
             }
         }
     }
-}
-
-suspend fun fetchPostsFromFirestoreStudentResourcesCategory(selectedFilter: String = "All"): List<StudentResources> {
-    val firestore = FirebaseFirestore.getInstance()
-    var query: Query = firestore.collection("studentResources")
-    val posts = mutableListOf<StudentResources>()
-
-    if (selectedFilter != "All") {
-        query = query.whereEqualTo("date", selectedFilter)
-    }
-
-    try {
-        val snapshot = query.orderBy("date", Query.Direction.DESCENDING).get().await()
-        for (document in snapshot.documents) {
-            val post = StudentResources(
-                id = document.id,
-                title = document.getString("title") ?: "",
-                content = document.getString("content") ?: "",
-                uid = document.getString("uid") ?: "",
-                userName = document.getString("userName") ?: "",
-                date = Date(document.getLong("date") ?: 0L),
-                imageUrls = document.get("imageUrls") as List<String>? ?: emptyList(),
-                category = document.getString("category") ?: ""
-            )
-            posts.add(post)
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-
-    return posts
 }

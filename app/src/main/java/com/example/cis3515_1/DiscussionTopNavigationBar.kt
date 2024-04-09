@@ -180,7 +180,7 @@ fun DiscussionTopNavigationBar(
                 {
                     Icon(
                         imageVector = Icons.Default.FilterAlt,
-                        contentDescription = "Category Filter"
+                        contentDescription = "Category_filter"
                     )
                 }
 
@@ -212,7 +212,7 @@ fun DiscussionTopNavigationBar(
                         onFilterSelected("Housing")
                         navController.navigate(Screen.StudentResources.createRoute("Housing"))
                         showFilterMenu.value = false
-                        Log.e("studentResources", "Housing")
+                        //Log.e("studentResources", "Housing")
                     })
                     DropdownMenuItem(text = { Text("Living") }, onClick = {
                         onFilterSelected("Living")
