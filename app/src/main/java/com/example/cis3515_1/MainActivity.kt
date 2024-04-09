@@ -1,5 +1,6 @@
 package com.example.cis3515_1
 
+import Model.NavigationItem
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Toast
@@ -39,7 +40,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cis3515_1.Navigation.NavBarBody
 import com.example.cis3515_1.Navigation.NavBarHeader
-import Model.NavigationItem
 import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.Navigation.SetupNavGraph
 import com.example.cis3515_1.ui.theme.Cis3515_1Theme

@@ -76,17 +76,6 @@ fun AddPostLostAndFoundScreen(modifier: Modifier = Modifier, navController: NavC
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = content,
-                onValueChange = { content = it },
-                label = { Text("Content") },
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
-            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
