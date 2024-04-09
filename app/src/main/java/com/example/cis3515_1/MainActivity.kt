@@ -91,7 +91,7 @@ class MainActivity : ComponentActivity() {
                     ),
                     NavigationItem(
                         title = "Student Resources",
-                        route = Screen.StudentResources.route,
+                        route = Screen.StudentResources.createRoute("All"),
                         selectedIcon = Icons.Filled.Accessibility,
                         unselectedIcon = Icons.Outlined.Accessibility
                     ),
@@ -155,7 +155,7 @@ class MainActivity : ComponentActivity() {
                         topBar = {
                             // Conditionally display the TopNavigationBar based on the current route
 
-                            if (currentRoute == Screen.Discussion.route || currentRoute == Screen.AddPost.route || currentRoute == Screen.PostDetail.route  || currentRoute == Screen.LostAndFound.route  || currentRoute == Screen.PostDetail_LostAndFound.route  || currentRoute == Screen.AddPostLostAndFound.route || currentRoute == Screen.AddPostStudentResources.route || currentRoute == Screen.StudentResources.route || currentRoute == Screen.PostDetail_StudentResources.route)
+                            if (currentRoute == Screen.Discussion.route || currentRoute == Screen.AddPost.route || currentRoute == Screen.PostDetail.route || currentRoute == Screen.DiscussionSearch.route || currentRoute == Screen.LostAndFound.route  || currentRoute == Screen.PostDetail_LostAndFound.route  || currentRoute == Screen.AddPostLostAndFound.route || currentRoute == Screen.AddPostStudentResources.route || currentRoute == Screen.StudentResources.route || currentRoute == Screen.PostDetail_StudentResources.route)
                             {
                                 DiscussionTopNavigationBar(
                                     onFilterSelected = { filter -> selectedFilter = filter },
@@ -164,7 +164,7 @@ class MainActivity : ComponentActivity() {
 
                             else if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.Discussion.route && currentRoute != Screen.RegisterScreen.route && currentRoute != Screen.AddPostStudentResources.route && currentRoute != Screen.StudentResources.route && currentRoute != Screen.PostDetail_StudentResources.route && currentRoute != Screen.StudentResourcesSearch.route)
                             {
-                                TopNavigationBar (onClick = { drawerState.open() })
+                                TopNavigationBar (onClick = { drawerState.open() }, navController = navController)
                                 //DiscussionTopNavigationBar(navController = navController, onFilterSelected = {it})
                             }
 

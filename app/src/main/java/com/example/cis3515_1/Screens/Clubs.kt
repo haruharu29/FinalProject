@@ -74,7 +74,7 @@ fun Clubs(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navControl
 {
     val clubsViewModel: ClubsViewModel = viewModel()
     val clubs by clubsViewModel.clubs.collectAsState()
-    Scaffold(topBar = {TopNavigationBar(onClick = onClick)},
+    Scaffold(topBar = {TopNavigationBar(onClick = onClick, navController = navController)},
         bottomBar = {BottomNavigationBar(navController)})
     { padding ->
         Column(

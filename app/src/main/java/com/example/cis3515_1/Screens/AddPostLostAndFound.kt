@@ -74,8 +74,7 @@ fun AddPostLostAndFoundScreen(modifier: Modifier = Modifier, navController: NavC
                 onValueChange = { title = it },
                 label = { Text("Title") },
                 shape = RoundedCornerShape(8.dp),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
 

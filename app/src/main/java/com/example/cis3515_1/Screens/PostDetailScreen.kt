@@ -230,14 +230,16 @@ fun PostDetailScreen(postId: String, navController: NavHostController)
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         )
                         {
                             Text(
                                 text = post!!.title,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 34.sp,
-                                lineHeight = 40.sp
+                                lineHeight = 40.sp,
+                                modifier = Modifier.weight(1f),
                             )
 
                             if (currentUserId == post!!.uid) {
@@ -832,13 +834,14 @@ fun ReplyInputDialog(
         },
         confirmButton = {
             Button(
-                onClick = { onReply(replyContent) }
+                colors = ButtonDefaults.buttonColors(containerColor = Red01),
+                onClick = { onReply(replyContent)}
             ) {
                 Text("Reply")
             }
         },
         dismissButton = {
-            Button(onClick = onDismissRequest) {
+            Button(onClick = onDismissRequest, colors = ButtonDefaults.buttonColors(containerColor = Red01)) {
                 Text("Cancel")
             }
         }

@@ -202,7 +202,7 @@ fun SetupNavGraph(onClick: suspend () -> Unit, navController: NavHostController)
 @Composable
 fun WebViewScreen(url: String, modifier: Modifier = Modifier, onClick: suspend () -> Unit, navController: NavHostController)
 {
-    Scaffold(topBar = { TopNavigationBar(onClick = onClick) }, bottomBar = { BottomNavigationBar(navController) })
+    Scaffold(topBar = { TopNavigationBar(onClick = onClick, navController = navController) }, bottomBar = { BottomNavigationBar(navController) })
     { padding ->
         Column(
             modifier = Modifier
