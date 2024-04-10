@@ -155,7 +155,7 @@ fun addEventScreen(modifier: Modifier = Modifier, navController: NavController) 
                     confirmButton = {
                         Button(
                             onClick = { showDialog = false },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Red01),
+                            colors = ButtonDefaults.buttonColors(containerColor = Red01),
                         ) {
                             Text("OK")
                         }

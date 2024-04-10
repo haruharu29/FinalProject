@@ -3,7 +3,6 @@ package com.example.cis3515_1
 import Model.NavigationItem
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Spacer
@@ -122,10 +121,6 @@ class MainActivity : ComponentActivity() {
                                 items = items,
                                 currentRoute = currentRoute
                             ) { currentNavigationItem ->
-                                if (currentNavigationItem.route == "share") {
-                                    Toast.makeText(context, "Share Clicked", Toast.LENGTH_LONG)
-                                        .show()
-                                } else {
                                     navController.navigate(currentNavigationItem.route) {
 
                                         navController.graph.startDestinationRoute?.let { startDestinationRoute ->
@@ -140,7 +135,6 @@ class MainActivity : ComponentActivity() {
 
                                         // Restore state when re-selecting a previously selected item
                                         restoreState = true
-                                    }
                                 }
 
                                 scope.launch {
@@ -201,4 +195,3 @@ class MainActivity : ComponentActivity() {
 
     }
 }
-
