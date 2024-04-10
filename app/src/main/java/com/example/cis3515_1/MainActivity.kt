@@ -42,7 +42,6 @@ import com.example.cis3515_1.Navigation.NavBarBody
 import com.example.cis3515_1.Navigation.NavBarHeader
 import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.Navigation.SetupNavGraph
-import com.example.cis3515_1.Screens.EventsTopNavigationBar
 import com.example.cis3515_1.ui.theme.Cis3515_1Theme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
