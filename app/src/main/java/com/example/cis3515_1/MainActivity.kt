@@ -42,7 +42,6 @@ import com.example.cis3515_1.Navigation.NavBarBody
 import com.example.cis3515_1.Navigation.NavBarHeader
 import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.Navigation.SetupNavGraph
-import com.example.cis3515_1.Screens.EventsTopNavigationBar
 import com.example.cis3515_1.ui.theme.Cis3515_1Theme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
@@ -156,21 +155,21 @@ class MainActivity : ComponentActivity() {
                         topBar = {
                             // Conditionally display the TopNavigationBar based on the current route
 
-                            if (currentRoute == Screen.Discussion.route || currentRoute == Screen.AddPost.route || currentRoute == Screen.PostDetail.route  || currentRoute == Screen.LostAndFound.route  || currentRoute == Screen.PostDetail_LostAndFound.route  || currentRoute == Screen.AddPostLostAndFound.route || currentRoute == Screen.AddPostStudentResources.route || currentRoute == Screen.StudentResources.route || currentRoute == Screen.PostDetail_StudentResources.route || currentRoute == Screen.UpcomingEvent.route || currentRoute == Screen.eventsSearch.route || currentRoute == Screen.eventsDetailsScreen.route || currentRoute == Screen.addEvent.route)
+                            if (currentRoute == Screen.Discussion.route || currentRoute == Screen.AddPost.route || currentRoute == Screen.PostDetail.route  || currentRoute == Screen.LostAndFound.route  || currentRoute == Screen.PostDetail_LostAndFound.route  || currentRoute == Screen.AddPostLostAndFound.route || currentRoute == Screen.AddPostStudentResources.route || currentRoute == Screen.StudentResources.route || currentRoute == Screen.PostDetail_StudentResources.route)
                             {
                                 DiscussionTopNavigationBar(
                                     onFilterSelected = { filter -> selectedFilter = filter },
                                     navController = navController, onClick = {drawerState.open()})
                             }
 
-                            else if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.Discussion.route && currentRoute != Screen.RegisterScreen.route && currentRoute != Screen.AddPostStudentResources.route && currentRoute != Screen.StudentResources.route && currentRoute != Screen.PostDetail_StudentResources.route && currentRoute != Screen.StudentResourcesSearch.route && currentRoute != Screen.UpcomingEvent.route && currentRoute != Screen.eventsSearch.route && currentRoute != Screen.eventsDetailsScreen.route && currentRoute != Screen.addEvent.route)
+                            else if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.Discussion.route && currentRoute != Screen.RegisterScreen.route && currentRoute != Screen.AddPostStudentResources.route && currentRoute != Screen.StudentResources.route && currentRoute != Screen.PostDetail_StudentResources.route && currentRoute != Screen.StudentResourcesSearch.route && currentRoute != Screen.UpcomingEvent.route && currentRoute != Screen.eventsSearch.route && currentRoute != Screen.addEvent.route)
                             {
                                 TopNavigationBar (onClick = { drawerState.open()}, navController = navController)
                             }
 
-                            else if (currentRoute == Screen.UpcomingEvent.route || currentRoute == Screen.eventsSearch.route || currentRoute == Screen.eventsDetailsScreen.route || currentRoute == Screen.addEvent.route)
+                            else if (currentRoute == Screen.UpcomingEvent.route || currentRoute == Screen.eventsSearch.route || currentRoute == Screen.addEvent.route)
                             {
-                                EventsTopNavigationBar(navController = navController)
+                                EventsTopNavigationBar(navController = navController, onClick = { drawerState.open()})
                             }
                                  },
                         bottomBar = {

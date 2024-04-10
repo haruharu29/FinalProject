@@ -10,10 +10,6 @@ sealed class Screen(val route: String)
     object UpcomingEvent: Screen("UpcomingEvent")
     object todaysEvents: Screen("todaysEvents")
     object addEvent: Screen("addEvent")
-    object eventsDetailsScreen : Screen("eventsDetailsScreen/{eventId}")
-    {
-        fun createRoute(eventId: String) = "eventsDetailsScreen/$eventId"
-    }
     object eventsSearch: Screen("eventsSearch")
 
     object LogIn: Screen("LogIn")

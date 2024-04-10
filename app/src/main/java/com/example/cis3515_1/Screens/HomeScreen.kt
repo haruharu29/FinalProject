@@ -42,6 +42,7 @@ import com.example.cis3515_1.BottomNavigationBar
 import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.R
 import com.example.cis3515_1.TopNavigationBar
+import com.example.cis3515_1.fetchEventsFromFirestore
 import com.example.cis3515_1.ui.theme.Red01
 import com.example.cis3515_1.ui.theme.Red05
 import com.example.cis3515_1.ui.theme.getTodaysDate

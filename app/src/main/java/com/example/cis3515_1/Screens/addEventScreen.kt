@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -30,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.example.cis3515_1.EventsTopNavigationBar
+import com.example.cis3515_1.ui.theme.Red01
 import com.example.cis3515_1.ui.theme.datePicker2
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -43,7 +46,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun addEventScreen(modifier: Modifier = Modifier, navController: NavController) {
     Scaffold(
-        topBar = { EventsTopNavigationBar(navController = navController
+        topBar = { EventsTopNavigationBar(navController = navController, onClick = {}
         ) }
     ) { paddingValues ->
         Column(
@@ -102,7 +105,9 @@ fun addEventScreen(modifier: Modifier = Modifier, navController: NavController) 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = { pickImagesLauncher.launch(arrayOf("image/*")) },
-                shape = RoundedCornerShape(8.dp),) {
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Red01),
+                ) {
                 Text("Choose Image")
             }
 
@@ -130,6 +135,7 @@ fun addEventScreen(modifier: Modifier = Modifier, navController: NavController) 
                     )
                 },
                 shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Red01),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Submit")
