@@ -53,4 +53,5 @@ sealed class Screen(val route: String)
     {
         fun createRoute(postId: String) = "postDetail_studentResources/$postId"
     }
+
 }

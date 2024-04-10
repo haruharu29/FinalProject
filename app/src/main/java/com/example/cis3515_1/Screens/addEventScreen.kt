@@ -107,7 +107,7 @@ fun addEventScreen(modifier: Modifier = Modifier, navController: NavController) 
             Button(onClick = { pickImagesLauncher.launch(arrayOf("image/*")) },
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Red01),
-                ) {
+            ) {
                 Text("Choose Image")
             }
 
@@ -184,4 +184,3 @@ fun uploadEvent(
         }
     }
 }
-

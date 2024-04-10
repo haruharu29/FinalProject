@@ -8,6 +8,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -72,13 +74,13 @@ fun CustomDatePickerDialog(
     DatePickerDialog(
         onDismissRequest = { },
         confirmButton = {
-            Button(onClick = { onAccept(state.selectedDateMillis) }) {
-                Text("Accept")
+            Button(onClick = { onAccept(state.selectedDateMillis) }, colors = ButtonDefaults.buttonColors(Red01)) {
+                Text("Accept", color = Color.White)
             }
         },
         dismissButton = {
-            Button(onClick = onCancel) {
-                Text("Cancel")
+            Button(onClick = onCancel, colors = ButtonDefaults.buttonColors(Red01)) {
+                Text("Cancel", color = Color.White)
             }
         }
     ) {

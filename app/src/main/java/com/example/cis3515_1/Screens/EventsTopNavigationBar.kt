@@ -13,8 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
@@ -57,9 +55,9 @@ fun EventsTopNavigationBar(navController: NavController,  onClick:  suspend () -
 
         navigationIcon = {
             if (currentRoute == Screen.UpcomingEvent.route) {
-                    IconButton(onClick = { scope.launch { onClick() } }) {
-                        Icon(imageVector = Icons.Default.Menu, contentDescription = "Toggle Drawer")
-                    }
+                IconButton(onClick = { scope.launch { onClick() } }) {
+                    Icon(imageVector = Icons.Default.Menu, contentDescription = "Toggle Drawer")
+                }
 
             } else {
                 IconButton(onClick = { navController.popBackStack() }) {
