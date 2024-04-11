@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -122,23 +123,44 @@ fun addEventScreen(modifier: Modifier = Modifier, navController: NavController) 
                     )
                 }
             }
+            var showDialog by remember { mutableStateOf(false) }
 
             Button(
                 onClick = {
-                    uploadEvent(
-                        nameOfEvent = nameOfEvent,
-                        description = description,
-                        location = location,
-                        date = date,
-                        imageUris = imageUris,
-                        navController = navController
-                    )
+                    if (imageUris.isNotEmpty()) {
+                        uploadEvent(
+                            nameOfEvent = nameOfEvent,
+                            description = description,
+                            location = location,
+                            date = date,
+                            imageUris = imageUris,
+                            navController = navController
+                        )
+                    } else {
+                        showDialog = true
+                    }
                 },
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Red01),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Submit")
+            }
+
+            if (showDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDialog = false },
+                    title = { Text(text = "Image Required") },
+                    text = { Text("Please choose at least one image for the event.") },
+                    confirmButton = {
+                        Button(
+                            onClick = { showDialog = false },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Red01),
+                        ) {
+                            Text("OK")
+                        }
+                    }
+                )
             }
         }
     }
