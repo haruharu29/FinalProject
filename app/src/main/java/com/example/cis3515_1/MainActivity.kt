@@ -155,7 +155,7 @@ class MainActivity : ComponentActivity() {
                         topBar = {
                             // Conditionally display the TopNavigationBar based on the current route
 
-                            if (currentRoute == Screen.Discussion.route || currentRoute == Screen.AddPost.route || currentRoute == Screen.PostDetail.route  || currentRoute == Screen.LostAndFound.route  || currentRoute == Screen.PostDetail_LostAndFound.route  || currentRoute == Screen.AddPostLostAndFound.route || currentRoute == Screen.AddPostStudentResources.route || currentRoute == Screen.StudentResources.route || currentRoute == Screen.PostDetail_StudentResources.route)
+                            if (currentRoute == Screen.Discussion.route || currentRoute == Screen.DiscussionSearch.route || currentRoute == Screen.AddPost.route || currentRoute == Screen.PostDetail.route  || currentRoute == Screen.LostAndFound.route  || currentRoute == Screen.PostDetail_LostAndFound.route  || currentRoute == Screen.AddPostLostAndFound.route || currentRoute == Screen.AddPostStudentResources.route || currentRoute == Screen.StudentResources.route || currentRoute == Screen.PostDetail_StudentResources.route)
                             {
                                 DiscussionTopNavigationBar(
                                     onFilterSelected = { filter -> selectedFilter = filter },
