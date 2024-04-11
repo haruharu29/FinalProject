@@ -1,6 +1,7 @@
 package com.example.cis3515_1.Screens
 
 import Model.upcomingEventsVars
+import com.google.accompanist.pager.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,17 +28,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import com.example.cis3515_1.BottomNavigationBar
 import com.example.cis3515_1.Navigation.Screen
 import com.example.cis3515_1.R
@@ -46,8 +52,11 @@ import com.example.cis3515_1.fetchEventsFromFirestore
 import com.example.cis3515_1.ui.theme.Red01
 import com.example.cis3515_1.ui.theme.Red05
 import com.example.cis3515_1.ui.theme.getTodaysDate
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class)
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalPagerApi::class)
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navController: NavHostController)
 {
@@ -64,17 +73,13 @@ fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navCo
             {
                 LazyColumn(modifier = Modifier)
                 {
-                    item{
-                        Spacer(modifier = Modifier.size(10.dp))
-                    }
-
                     val gradient = Brush.verticalGradient(colors = listOf(Red05, Red01))
 
                     item {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(5.dp)
+                                .padding(15.dp)
                         )
                         {
                             Box(
@@ -82,81 +87,76 @@ fun HomeScreen(modifier: Modifier = Modifier, onClick: suspend () -> Unit, navCo
                                     .background(brush = gradient)
                                     .height(200.dp)
                                     .fillMaxWidth()
-                            )
-                            {
-                                val upcomingEvents = remember { mutableStateOf<List<upcomingEventsVars>>(emptyList()) }
+                            ) {
+                                val upcomingEvents =
+                                    remember { mutableStateOf<List<upcomingEventsVars>>(emptyList()) }
                                 val todayDate = getTodaysDate()
                                 LaunchedEffect(todayDate) {
-
                                     upcomingEvents.value = fetchEventsFromFirestore(todayDate)
                                 }
 
-                                if (upcomingEvents.value.size.equals(0))
-                                {
-                                    Image(painter = painterResource(id = R.drawable.tuj_2),
-                                        contentDescription = "icon",
-                                        modifier = Modifier
-                                            .alpha(alpha = 0.9F).fillMaxWidth()
-                                    )
+                                val pageCount = if (upcomingEvents.value.isEmpty()) 2 else upcomingEvents.value.size + 1
+                                val pagerState = rememberPagerState(initialPage = 0, pageCount = {pageCount})
+                                val coroutineScope = rememberCoroutineScope()
+
+                                LaunchedEffect(key1 = true) {
+                                    coroutineScope.launch {
+                                        while (true) {
+                                            delay(3000)
+                                            val nextPage = (pagerState.currentPage + 1) % pagerState.pageCount
+                                            pagerState.animateScrollToPage(nextPage)
+                                        }
+                                    }
                                 }
-                                val state = rememberPagerState(pageCount = {
-                                    upcomingEvents.value.size
-                                })
-                                //EventList(upcomingEvents = upcomingEvents.value, navController)
+
                                 HorizontalPager(
-                                    state = state
+                                    state = pagerState
                                 ) { page ->
-
-                                    val event = upcomingEvents.value.getOrNull(page)
-                                    event?.let {
-                                        Row {
-
-                                            Column(modifier = modifier.weight(1F).padding(10.dp)
-                                                .fillMaxHeight()) {
-                                                if ( it.imageUrls.firstOrNull().equals(null))
-                                                {
-                                                    Image(painter = painterResource(id = R.drawable.tuj_2),
-                                                        contentDescription = "icon",
-                                                        modifier = Modifier
-                                                            .alpha(alpha = 0.9F)//.fillMaxSize(1f)
-                                                    )
-                                                }
-
-                                                Image(
-                                                    painter = rememberImagePainter(
-                                                        data = it.imageUrls.firstOrNull(), // Display first image if available,
-                                                       builder = {
-                                                            crossfade(true)
-                                                        }
-                                                    ),
-                                                    modifier = Modifier.fillMaxSize(1f),
-                                                    contentDescription = null
-                                                )
-                                            }
-                                            //Spacer(modifier = modifier.padding(10.dp))
-                                            /*Column(modifier = modifier.weight(1F).fillMaxHeight().padding(10.dp)) {
-                                                Text(text = "Name Of Event: ${it.nameOfEvent}")
-                                                Text(text = "Location: ${it.location}")
-                                                Text(text = "Description: ${it.description}")
-                                                Text(text = "Date: ${it.date}")
-                                            }*/
+                                    when {
+                                        page == 0 -> {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.welcome),
+                                                contentDescription = "Event Image",
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop
+                                            )
                                         }
 
+                                        page == 1 && upcomingEvents.value.isEmpty() -> {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.noevent),
+                                                contentDescription = "No Event",
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        }
 
-
-                                        // Delete event if necessary
-                                        // deleteEvent(it.id, navController)
-
+                                        else -> {
+                                            val eventIndex = page - 1
+                                            val event = upcomingEvents.value.getOrNull(eventIndex)
+                                            event?.let {
+                                                Image(
+                                                    painter = rememberAsyncImagePainter(
+                                                        ImageRequest.Builder(
+                                                            LocalContext.current
+                                                        ).data(data = it.imageUrls.firstOrNull())
+                                                            .apply(block = fun ImageRequest.Builder.() {
+                                                                crossfade(true)
+                                                            }).build()
+                                                    ),
+                                                    contentDescription = "Event Image",
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    contentScale = ContentScale.FillWidth
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
-
                         }
+
                     }
 
-                    item{
-                        Spacer(modifier = Modifier.size(10.dp))
-                    }
 
                     item {
                         Row(Modifier.padding(start = 10.dp))

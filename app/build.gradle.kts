@@ -126,4 +126,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation ("com.google.firebase:firebase-appcheck-safetynet:16.1.2")
 
+    implementation ("com.google.accompanist:accompanist-pager:0.35.0-alpha")
+    implementation ("com.google.accompanist:accompanist-pager-indicators:0.35.0-alpha")
+
 }
