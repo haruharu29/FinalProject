@@ -107,7 +107,6 @@ class MainActivity : ComponentActivity() {
                         selectedIcon = Icons.Filled.Contacts,
                         unselectedIcon = Icons.Outlined.Contacts
                     )
-
                 )
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                 val scope = rememberCoroutineScope()
@@ -171,7 +170,7 @@ class MainActivity : ComponentActivity() {
                             {
                                 EventsTopNavigationBar(navController = navController, onClick = { drawerState.open()})
                             }
-                                 },
+                        },
                         bottomBar = {
                             // Conditionally display the BottomNavigationBar based on the current route
                             if (currentRoute != Screen.Splash.route && currentRoute != Screen.Account.route && currentRoute != Screen.RegisterScreen.route) {
@@ -202,5 +201,4 @@ class MainActivity : ComponentActivity() {
 
     }
 }
-
 

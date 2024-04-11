@@ -1,6 +1,5 @@
 package com.example.cis3515_1.Navigation
 
-//import com.example.cis3515_1.Screens.CourseSchedule
 import android.graphics.Bitmap
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
@@ -135,12 +134,12 @@ fun SetupNavGraph(onClick: suspend () -> Unit, navController: NavHostController)
         {
             WebViewScreen("https://templeu.instructure.com", onClick = onClick, navController = navController)
         }
-        
+
         composable(route = Screen.Outlook.route)
         {
             WebViewScreen(url = "https://outlook.office.com/mail/", onClick = onClick, navController = navController)
         }
-        
+
         composable(route = Screen.CourseSchedule.route)
         {
             WebViewScreen(url = "https://www.tuj.ac.jp/ug/academics/semester-info/schedule", onClick = onClick, navController = navController)
