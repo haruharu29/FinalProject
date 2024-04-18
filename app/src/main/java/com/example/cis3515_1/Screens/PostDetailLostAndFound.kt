@@ -232,6 +232,11 @@ fun deletePost_l(postId: String, navController: NavController) {
 
     GlobalScope.launch(Dispatchers.IO) {
         try {
+            val usernamesCollection = firestore.collection("lost").document(postId).collection("usernames")
+            val usernames = usernamesCollection.get().await()
+            for (username in usernames) {
+                usernamesCollection.document(username.id).delete().await()
+            }
             firestore.collection("lost").document(postId).delete().await()
             withContext(Dispatchers.Main) {
                 navController.popBackStack()

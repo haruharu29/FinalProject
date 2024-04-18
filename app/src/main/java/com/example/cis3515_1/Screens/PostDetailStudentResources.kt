@@ -270,6 +270,11 @@ fun deletePostStudentResources(postId: String, navController: NavController) {
 
     GlobalScope.launch(Dispatchers.IO) {
         try {
+            val usernamesCollection = firestore.collection("studentResources").document(postId).collection("usernames")
+            val usernames = usernamesCollection.get().await()
+            for (username in usernames) {
+                usernamesCollection.document(username.id).delete().await()
+            }
             firestore.collection("studentResources").document(postId).delete().await()
             withContext(Dispatchers.Main) {
                 navController.popBackStack()
